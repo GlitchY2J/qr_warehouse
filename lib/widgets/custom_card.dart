@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:qr_warehouse/pages/edit_page.dart';
+import 'package:qr_warehouse/pages/details_page.dart';
 
 class CustomCard extends StatefulWidget {
   const CustomCard({
@@ -43,7 +43,7 @@ class _CustomCardState extends State<CustomCard> {
             //debugPrint(widget.partsList["0"]);
             Navigator.of(context).push(
               CupertinoPageRoute(
-                builder: (BuildContext context) => EditPage(
+                builder: (BuildContext context) => DetailsPage(
                   parts: widget.partsList,
                 ),
               ),

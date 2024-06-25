@@ -108,7 +108,7 @@ class EditPage extends StatelessWidget {
                           )),
                           onPressed: () {},
                           icon: const Icon(Icons.check),
-                          label: const Text("Atualizar"),
+                          label: const Text("Actualizar"),
                         ),
                       ),
                       const SizedBox(height: 32),

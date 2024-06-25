@@ -69,8 +69,8 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
 
-  msix_config:
-    display_name: QR Warehouse
-    languages: en-us
-    certificate_path: C:\Users\jguerra\Documents\GLITCH.pfx
-    certificate_password: test
+  # msix_config:
+  #   display_name: QR Warehouse
+  #   languages: en-us
+  #   certificate_path: C:\Users\jguerra\Documents\GLITCH.pfx
+  #   certificate_password: test

@@ -144,12 +144,10 @@ class _QueryPageState extends State<QueryPage> {
                             borderRadius: BorderRadius.circular(5.0),
                           )),
                           onPressed: () {
-                            setState(() {
-                              showDataTable = true;
-                            });
+                            asyncInit();
                           },
-                          icon: const Icon(Icons.search),
-                          label: const Text('Buscar'),
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Refresh'),
                         ),
                       ),
                       const SizedBox(height: 48),
@@ -170,17 +168,7 @@ class _QueryPageState extends State<QueryPage> {
                                 horizontal: 20,
                               ),
                               child: InkWell(
-                                onTap: () {
-                                  debugPrint('tapped');
-                                  // Navigator.of(context).push(
-                                  //   CupertinoPageRoute(
-                                  //     builder: (BuildContext context) =>
-                                  //         EditPage(
-                                  //       parts: parts[index],
-                                  //     ),
-                                  //   ),
-                                  // )
-                                },
+                                onTap: () {},
                                 child: CustomCard(
                                   partnumber:
                                       parts[index]["partnumber"].toString(),
