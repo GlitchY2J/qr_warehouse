@@ -25,8 +25,24 @@ class CustomCard extends StatefulWidget {
 }
 
 class _CustomCardState extends State<CustomCard> {
+  late int min, max;
+
+  Color backgroundColor = const Color(0xff323537);
+  Color greenBackground = Colors.green[400]!;
+  Color yellowBackground = Colors.amber[600]!;
+  Color redBackground = const Color(0xFFFF5252);
+
+  @override
+  void initState() {
+    min = int.parse(widget.partsList["3"]);
+    max = int.parse(widget.partsList["4"]);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
+    double minratio = max * 0.20;
+    double maxratio = max * 0.10;
     return Container(
       width: 300,
       height: 100,
@@ -34,7 +50,14 @@ class _CustomCardState extends State<CustomCard> {
         borderRadius: BorderRadius.circular(12),
       ),
       child: Material(
-        color: const Color(0xff323537),
+        color: int.parse(widget.qty) >= max || int.parse(widget.qty) <= min
+            ? redBackground
+            : int.parse(widget.qty) >= min &&
+                        int.parse(widget.qty) <= minratio + min ||
+                    int.parse(widget.qty) <= max &&
+                        int.parse(widget.qty) >= max - maxratio
+                ? yellowBackground
+                : greenBackground,
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
@@ -80,7 +103,7 @@ class _CustomCardState extends State<CustomCard> {
                     Text(
                       widget.description,
                       style: const TextStyle(
-                        color: Colors.grey,
+                        color: Colors.white,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -88,7 +111,7 @@ class _CustomCardState extends State<CustomCard> {
                     Text(
                       widget.qty,
                       style: const TextStyle(
-                        color: Colors.green,
+                        color: Colors.white,
                         fontSize: 15,
                       ),
                     ),

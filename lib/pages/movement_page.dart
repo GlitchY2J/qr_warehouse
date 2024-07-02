@@ -7,13 +7,15 @@ class MovementPage extends StatefulWidget {
   final int quantity;
   final String partnumber;
   final String action;
+  final String title;
 
   const MovementPage(
       {super.key,
       required this.parts,
       required this.quantity,
       required this.partnumber,
-      required this.action});
+      required this.action,
+      required this.title});
 
   @override
   State<MovementPage> createState() => _MovementPageState();
@@ -52,9 +54,9 @@ class _MovementPageState extends State<MovementPage> {
                     children: [
                       Container(
                         alignment: Alignment.centerLeft,
-                        child: const Text(
-                          'Surtir Orden',
-                          style: TextStyle(
+                        child: Text(
+                          widget.title,
+                          style: const TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 24),
                         ),
                       ),
