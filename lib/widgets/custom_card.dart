@@ -44,7 +44,7 @@ class _CustomCardState extends State<CustomCard> {
     double minratio = max * 0.20;
     double maxratio = max * 0.10;
     return Container(
-      width: 300,
+      width: 400,
       height: 100,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
@@ -100,12 +100,16 @@ class _CustomCardState extends State<CustomCard> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      widget.description,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                    SizedBox(
+                      width: 230,
+                      child: Text(
+                        widget.description,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     Text(

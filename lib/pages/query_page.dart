@@ -1,7 +1,10 @@
 import 'dart:convert';
+import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_warehouse/models/part_number.dart';
+import 'package:qr_warehouse/pages/bulk_results.dart';
 import 'package:qr_warehouse/pages/qr_scan_page.dart';
+import 'package:qr_warehouse/utils/encrypt_data.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
 import 'package:http/http.dart' as http;
 import 'package:qr_warehouse/widgets/custom_card.dart';
@@ -31,15 +34,58 @@ class _QueryPageState extends State<QueryPage> {
     await getPartNumbers();
   }
 
-  void openScannerScreen() async {
+  encryptUrl(String url) {
+    const String key = "58648FEEE6F2A342";
+    String encryptedUrl = EncryptData.encryptAES(url, key);
+
+    debugPrint(encryptedUrl);
+  }
+
+  String decryptUrl(String encryptedString) {
+    const String key = "58648FEEE6F2A342";
+    String decryptedUrl = EncryptData.decryptAES(encryptedString, key);
+
+    return decryptedUrl;
+  }
+
+  Future<List<List<dynamic>>> fetchTextData(String url) async {
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      return const CsvToListConverter().convert(response.body);
+    } else {
+      return [];
+    }
+  }
+
+  formatCSVToList(String url) async {
+    String decryptedUrl = decryptUrl(url);
+    //String decryptedUrl = decryptUrl(url);
+    List<List<dynamic>> partsList = await fetchTextData(decryptedUrl);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => BulkResults(
+                partsList: partsList,
+              )),
+    );
+  }
+
+  void openScannerScreen(String paramater) async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const QRScanPage()),
     );
 
-    if (result != null) {
-      partModel.partNumber = result;
-      searchPartNumber();
+    if (paramater == "bulk") {
+      if (result != null) {
+        formatCSVToList(result);
+      }
+    } else {
+      if (result != null) {
+        partModel.partNumber = result;
+        searchPartNumber();
+      }
     }
   }
 
@@ -78,9 +124,10 @@ class _QueryPageState extends State<QueryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(),
       body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 40),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 30),
         child: Center(
           child: Column(
             children: [
@@ -106,7 +153,7 @@ class _QueryPageState extends State<QueryPage> {
                     // QR Button
                     flex: 1,
                     child: CustomIconButton(
-                      onTap: openScannerScreen,
+                      onTap: () => openScannerScreen("query"),
                       icon: Icons.qr_code,
                     ),
                   )
@@ -158,8 +205,8 @@ class _QueryPageState extends State<QueryPage> {
               ),
               const SizedBox(height: 48),
 
-              Container(
-                height: MediaQuery.of(context).size.height - 360,
+              SizedBox(
+                height: MediaQuery.of(context).size.height - 450,
                 child: ListView.builder(
                   scrollDirection: Axis.vertical,
                   shrinkWrap: true,
@@ -195,8 +242,8 @@ class _QueryPageState extends State<QueryPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF323537),
-        onPressed: () {},
+        backgroundColor: const Color(0xFF448AFF),
+        onPressed: () => openScannerScreen("bulk"),
         child: const Icon(Icons.add),
       ),
     );
