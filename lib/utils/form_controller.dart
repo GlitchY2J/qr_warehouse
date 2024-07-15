@@ -13,8 +13,8 @@ class FormController {
   }
 
   /// GET INVENTORY
-  static Future<http.Response> getInventory() async {
-    return await DatabaseHelper.get("get_inventory.php");
+  static Future<http.Response> getTable(table) async {
+    return await DatabaseHelper.get("get_table.php", {"table": table});
   }
 
   /// UPDATE RECORD

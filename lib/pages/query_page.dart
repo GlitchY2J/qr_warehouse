@@ -9,7 +9,6 @@ import 'package:qr_warehouse/utils/form_controller.dart';
 import 'package:http/http.dart' as http;
 import 'package:qr_warehouse/widgets/custom_card.dart';
 import 'package:qr_warehouse/widgets/custom_icon_button.dart';
-import 'package:qr_warehouse/widgets/custom_icon_button2.dart';
 import 'package:qr_warehouse/widgets/custom_textfield.dart';
 
 class QueryPage extends StatefulWidget {
@@ -92,7 +91,7 @@ class _QueryPageState extends State<QueryPage> {
   }
 
   Future<void> getPartNumbers() async {
-    http.Response response = await FormController.getInventory();
+    http.Response response = await FormController.getTable("inventory");
     setState(() {
       allParts = jsonDecode(response.body);
       parts = allParts;
@@ -129,7 +128,7 @@ class _QueryPageState extends State<QueryPage> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     final double desktopPadding = screenWidth * 0.22;
-    final double mobilePadding = screenWidth * 0.1;
+    final double mobilePadding = screenWidth * 0.06;
 
     return Scaffold(
       backgroundColor: const Color(0xFF17153B),
@@ -140,7 +139,7 @@ class _QueryPageState extends State<QueryPage> {
       body: Padding(
         padding: EdgeInsets.symmetric(
           vertical: 14,
-          horizontal: screenWidth < 600 ? mobilePadding : desktopPadding,
+          horizontal: screenWidth < 800 ? mobilePadding : desktopPadding,
         ),
         child: Center(
           child: Column(
@@ -164,10 +163,11 @@ class _QueryPageState extends State<QueryPage> {
                     // QR Button
                     flex: 1,
                     child: CustomIconButton(
-                      text: screenWidth < 600 ? "" : "Escanea",
+                      text: screenWidth < 800 ? "" : "Escanea",
                       icon: Icons.qr_code,
                       height: 50,
                       width: screenWidth,
+                      iconPadding: 12,
                       onPressed: () => openScannerScreen("query"),
                     ),
                   )
@@ -211,7 +211,7 @@ class _QueryPageState extends State<QueryPage> {
               const SizedBox(height: 48),
 
               SizedBox(
-                height: screenHeight - 380,
+                height: screenHeight - 400,
                 child: ListView.builder(
                   scrollDirection: Axis.vertical,
                   shrinkWrap: true,

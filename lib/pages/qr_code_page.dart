@@ -65,7 +65,7 @@ class _QRCodePageState extends State<QRCodePage> {
       body: Center(
         child: Padding(
           padding: EdgeInsets.symmetric(
-            horizontal: screenWidth < 600 ? mobilePadding : desktopPadding,
+            horizontal: screenWidth < 800 ? mobilePadding : desktopPadding,
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

@@ -8,12 +8,14 @@ class CustomIconButton extends StatelessWidget {
     required this.height,
     required this.width,
     required this.onPressed,
+    this.iconPadding = 0,
   });
 
   final String text;
   final IconData icon;
   final double height;
   final double width;
+  final double iconPadding;
   final VoidCallback onPressed;
 
   @override
@@ -28,9 +30,12 @@ class CustomIconButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(5.0),
             )),
         onPressed: onPressed,
-        icon: Icon(
-          icon,
-          color: Colors.white,
+        icon: Padding(
+          padding: EdgeInsets.only(left: iconPadding),
+          child: Icon(
+            icon,
+            color: Colors.white,
+          ),
         ),
         label: Text(
           text,

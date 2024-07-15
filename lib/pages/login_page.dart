@@ -6,6 +6,7 @@ import 'package:qr_warehouse/widgets/app_text.dart';
 import 'package:qr_warehouse/widgets/astro_logo.dart';
 import 'package:qr_warehouse/widgets/custom_button.dart';
 import 'package:qr_warehouse/widgets/custom_textfield.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
@@ -25,6 +26,9 @@ class LoginPage extends StatelessWidget {
     // If user exists go to the main page
     if (result["success"] == "true") {
       // Go to main page
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString("username", "jguerra");
+
       if (context.mounted) {
         Navigator.pushReplacement(context,
             CupertinoPageRoute(builder: (context) => const MainPage()));
@@ -55,7 +59,7 @@ class LoginPage extends StatelessWidget {
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(
-            horizontal: screenWidth < 600 ? mobilePadding : desktopPadding,
+            horizontal: screenWidth < 800 ? mobilePadding : desktopPadding,
           ),
           child: Center(
             child: Column(
@@ -65,9 +69,9 @@ class LoginPage extends StatelessWidget {
                 // Logo
                 const AstroLogo(
                   color: Colors.white,
-                  width: 180,
+                  width: 120,
                 ),
-                const SizedBox(height: 100),
+                const SizedBox(height: 80),
 
                 // Login text
                 AppText(
@@ -75,7 +79,7 @@ class LoginPage extends StatelessWidget {
                   color: Colors.grey[500],
                   size: 16,
                 ),
-                const SizedBox(height: 50),
+                const SizedBox(height: 30),
 
                 // Username TextField
                 Padding(
@@ -99,7 +103,7 @@ class LoginPage extends StatelessWidget {
                     keyboardType: TextInputType.text,
                   ),
                 ),
-                const SizedBox(height: 50),
+                const SizedBox(height: 30),
 
                 // sign in button
                 CustomButton(

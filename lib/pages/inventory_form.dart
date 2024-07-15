@@ -63,7 +63,7 @@ class _InventoryFormPageState extends State<InventoryFormPage> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final double desktopPadding = screenWidth * 0.25;
-    final double mobilePadding = screenWidth * 0.1;
+    final double mobilePadding = screenWidth * 0.10;
 
     return Scaffold(
       backgroundColor: const Color(0xFF17153B),
@@ -74,7 +74,7 @@ class _InventoryFormPageState extends State<InventoryFormPage> {
       body: Padding(
         padding: EdgeInsets.symmetric(
           vertical: 14,
-          horizontal: screenWidth < 600 ? mobilePadding : desktopPadding,
+          horizontal: screenWidth < 800 ? mobilePadding : desktopPadding,
         ),
         child: Center(
           child: Column(
@@ -82,7 +82,7 @@ class _InventoryFormPageState extends State<InventoryFormPage> {
               Form(
                 child: Column(
                   children: [
-                    const SizedBox(height: 150),
+                    const SizedBox(height: 50),
                     // Part Number
                     CustomTextField(
                       controller: partNumberController,

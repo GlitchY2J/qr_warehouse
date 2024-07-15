@@ -5,8 +5,9 @@ class DatabaseHelper {
   static const String _baseUrl = 'http://10.30.0.42/Dashboard/qr_warehouse';
 
   /// GET METHOD
-  static Future<http.Response> get(String endpoint) async {
-    final response = await http.get(Uri.parse('$_baseUrl/$endpoint'));
+  static Future<http.Response> get(String endpoint, dynamic data) async {
+    final response = await http
+        .get(Uri.parse('$_baseUrl/$endpoint').replace(queryParameters: data));
     return response;
   }
 
