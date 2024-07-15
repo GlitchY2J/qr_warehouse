@@ -1,57 +1,42 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class CustomIconButton extends StatelessWidget {
   const CustomIconButton({
-    this.borderRadius = 4,
-    this.splashColor = const Color.fromRGBO(3, 155, 229, 1),
-    this.alignment = Alignment.center,
-    this.backgroundColor = const Color(0xff323537),
-    required this.icon,
-    this.iconColor = Colors.white,
-    this.iconSize = 32,
-    required this.onTap,
     super.key,
+    required this.text,
+    required this.icon,
+    required this.height,
+    required this.width,
+    required this.onPressed,
   });
 
-  final double borderRadius;
-  final Color splashColor;
-  final Alignment alignment;
-  final Color backgroundColor;
+  final String text;
   final IconData icon;
-  final Color iconColor;
-  final double iconSize;
-  final VoidCallback onTap;
+  final double height;
+  final double width;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(borderRadius),
-      ),
-      child: Material(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(borderRadius),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(borderRadius),
-          splashColor: splashColor,
-          onTap: onTap,
-          child: Container(
-            width: double.infinity,
-            alignment: alignment,
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            decoration: ShapeDecoration(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(borderRadius),
-                ),
-              ),
-            ),
-            child: Icon(
-              icon,
-              color: iconColor,
-              size: iconSize,
-            ),
+    return SizedBox(
+      width: width,
+      height: height,
+      child: ElevatedButton.icon(
+        style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF433D8B),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(5.0),
+            )),
+        onPressed: onPressed,
+        icon: Icon(
+          icon,
+          color: Colors.white,
+        ),
+        label: Text(
+          text,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
           ),
         ),
       ),

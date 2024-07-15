@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -9,8 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import 'package:qr_warehouse/pages/main_page.dart';
+import 'package:qr_warehouse/widgets/custom_icon_button.dart';
+import 'package:qr_warehouse/widgets/qr_image_view.dart';
 
 class QRCodePage extends StatefulWidget {
   const QRCodePage({super.key, required this.code});
@@ -24,7 +23,7 @@ class QRCodePage extends StatefulWidget {
 class _QRCodePageState extends State<QRCodePage> {
   final GlobalKey _qrkey = GlobalKey();
 
-  Future<void> convertQRCodeToImage() async {
+  Future<void> convertQRCodeToImage(context) async {
     RenderRepaintBoundary boundary =
         _qrkey.currentContext!.findRenderObject() as RenderRepaintBoundary;
     ui.Image image = await boundary.toImage(pixelRatio: 3.0);
@@ -39,12 +38,23 @@ class _QRCodePageState extends State<QRCodePage> {
     File imgFile = File("$directory/qrCode.png");
 
     await imgFile.writeAsBytes(pngBytes);
+
+    SnackBar snackBar = const SnackBar(
+        content: Text("Código QR guardado en la carpeta de Descargas."));
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    final double desktopPadding = screenWidth * 0.25;
+    final double mobilePadding = screenWidth * 0.1;
+
     return Scaffold(
+      backgroundColor: const Color(0xFF17153B),
       appBar: AppBar(
+        backgroundColor: const Color(0xFF17153B),
         actions: [
           IconButton(
             onPressed: () => Get.offAll(() => const MainPage()),
@@ -53,37 +63,30 @@ class _QRCodePageState extends State<QRCodePage> {
         ],
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16.0),
-              child: RepaintBoundary(
-                key: _qrkey,
-                child: QrImageView(
-                  data: widget.code,
-                  version: QrVersions.auto,
-                  backgroundColor: Colors.white,
-                  padding: const EdgeInsets.all(20),
-                  size: 350,
-                  gapless: true,
-                ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: screenWidth < 600 ? mobilePadding : desktopPadding,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              QRImageView(
+                qrkey: _qrkey,
+                widget: widget,
+                screenWidth: screenWidth,
               ),
-            ),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: 380.0,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5.0),
-                )),
-                onPressed: convertQRCodeToImage,
-                icon: const Icon(Icons.save),
-                label: const Text('Exportar'),
+              const SizedBox(height: 50),
+
+              // Export png button
+              CustomIconButton(
+                text: "Exportar",
+                icon: Icons.save,
+                height: 50,
+                width: screenWidth * 0.3,
+                onPressed: () => convertQRCodeToImage(context),
               ),
-            )
-          ],
+            ],
+          ),
         ),
       ),
     );

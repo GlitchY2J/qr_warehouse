@@ -9,6 +9,8 @@ import 'package:qr_warehouse/utils/form_controller.dart';
 import 'package:http/http.dart' as http;
 import 'package:qr_warehouse/widgets/custom_card.dart';
 import 'package:qr_warehouse/widgets/custom_icon_button.dart';
+import 'package:qr_warehouse/widgets/custom_icon_button2.dart';
+import 'package:qr_warehouse/widgets/custom_textfield.dart';
 
 class QueryPage extends StatefulWidget {
   const QueryPage({super.key});
@@ -123,11 +125,23 @@ class _QueryPageState extends State<QueryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    final double desktopPadding = screenWidth * 0.22;
+    final double mobilePadding = screenWidth * 0.1;
+
     return Scaffold(
+      backgroundColor: const Color(0xFF17153B),
       resizeToAvoidBottomInset: false,
-      appBar: AppBar(),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF17153B),
+      ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 30),
+        padding: EdgeInsets.symmetric(
+          vertical: 14,
+          horizontal: screenWidth < 600 ? mobilePadding : desktopPadding,
+        ),
         child: Center(
           child: Column(
             children: [
@@ -136,25 +150,25 @@ class _QueryPageState extends State<QueryPage> {
                   Expanded(
                     // Part Number
                     flex: 3,
-                    child: SizedBox(
-                      width: 600,
-                      child: TextFormField(
-                        onChanged: (String value) {
-                          updatePartNumber(value);
-                        },
-                        decoration: const InputDecoration(
-                          labelText: "Número de Parte",
-                        ),
-                      ),
+                    child: CustomTextField(
+                      hintText: "Número de Parte",
+                      obscureText: false,
+                      keyboardType: TextInputType.text,
+                      onChanged: (String value) {
+                        updatePartNumber(value);
+                      },
                     ),
                   ),
-                  const SizedBox(width: 56),
+                  const SizedBox(width: 25),
                   Expanded(
                     // QR Button
                     flex: 1,
                     child: CustomIconButton(
-                      onTap: () => openScannerScreen("query"),
+                      text: screenWidth < 600 ? "" : "Escanea",
                       icon: Icons.qr_code,
+                      height: 50,
+                      width: screenWidth,
+                      onPressed: () => openScannerScreen("query"),
                     ),
                   )
                 ],
@@ -164,22 +178,19 @@ class _QueryPageState extends State<QueryPage> {
               Row(
                 children: [
                   Expanded(
-                    // Description
+                    // Description TextField
                     flex: 3,
                     child: // Description
-                        SizedBox(
-                      width: 600.0,
-                      child: TextFormField(
-                        onChanged: (String value) {
-                          updateDescription(value);
-                        },
-                        decoration: const InputDecoration(
-                          labelText: "Descripción",
-                        ),
-                      ),
+                        CustomTextField(
+                      hintText: "Descripción",
+                      obscureText: false,
+                      keyboardType: TextInputType.text,
+                      onChanged: (String value) {
+                        updateDescription(value);
+                      },
                     ),
                   ),
-                  const SizedBox(width: 56),
+                  const SizedBox(width: 25),
                   Expanded(
                     // QR Button
                     flex: 1,
@@ -189,24 +200,18 @@ class _QueryPageState extends State<QueryPage> {
               ),
               const SizedBox(height: 48),
               // Search Button
-              SizedBox(
-                width: 600.0,
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5.0),
-                  )),
-                  onPressed: () {
-                    asyncInit();
-                  },
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Refresh'),
-                ),
+
+              CustomIconButton(
+                text: "Actualizar",
+                icon: Icons.refresh,
+                height: 50,
+                width: screenWidth,
+                onPressed: asyncInit,
               ),
               const SizedBox(height: 48),
 
               SizedBox(
-                height: MediaQuery.of(context).size.height - 450,
+                height: screenHeight - 380,
                 child: ListView.builder(
                   scrollDirection: Axis.vertical,
                   shrinkWrap: true,
@@ -242,9 +247,12 @@ class _QueryPageState extends State<QueryPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF448AFF),
+        backgroundColor: const Color(0xFFC8ACD6),
         onPressed: () => openScannerScreen("bulk"),
-        child: const Icon(Icons.add),
+        child: const Icon(
+          Icons.add,
+          color: Color(0xFF17153B),
+        ),
       ),
     );
   }

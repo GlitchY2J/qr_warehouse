@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:qr_warehouse/pages/main_page.dart';
+import 'package:qr_warehouse/pages/login_page.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -8,10 +8,11 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.system,
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
-      home: const MainPage(),
+      home: LoginPage(),
     );
   }
 }

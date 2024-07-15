@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_warehouse/pages/movement_page.dart';
+import 'package:qr_warehouse/widgets/app_text.dart';
+import 'package:qr_warehouse/widgets/custom_icon_button.dart';
 
 class DetailsPage extends StatefulWidget {
   final Map<String, dynamic> parts;
@@ -46,8 +48,16 @@ class _DetailsPageState extends State<DetailsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final buttonWidth = MediaQuery.of(context).size.width;
+    final String partNumber = widget.parts["0"];
+    final String description = widget.parts["1"];
+    final String location = widget.parts["5"];
+
     return Scaffold(
-      appBar: AppBar(),
+      backgroundColor: const Color(0xFF17153B),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF17153B),
+      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 80),
@@ -56,42 +66,48 @@ class _DetailsPageState extends State<DetailsPage> {
             child: Column(
               children: [
                 // Part Number
-                SizedBox(width: 600, child: Text(widget.parts["0"])),
+                Container(
+                  alignment: Alignment.topLeft,
+                  child:
+                      AppText(text: partNumber, color: Colors.white, size: 38),
+                ),
                 const SizedBox(height: 16),
-                SizedBox(width: 600, child: Text(widget.parts["1"])),
+                Container(
+                  alignment: Alignment.topLeft,
+                  child: AppText(
+                      text: description, color: Colors.white60, size: 18),
+                ),
                 const SizedBox(height: 16),
-                SizedBox(width: 600, child: Text(widget.parts["5"])),
+                Container(
+                  alignment: Alignment.topLeft,
+                  child:
+                      AppText(text: location, color: Colors.white60, size: 18),
+                ),
                 const SizedBox(height: 16),
-                SizedBox(width: 600, child: Text(quantity.toString())),
+                Container(
+                  alignment: Alignment.topLeft,
+                  child: AppText(
+                      text: quantity.toString(),
+                      color: Colors.white60,
+                      size: 18),
+                ),
                 const SizedBox(height: 64),
-                SizedBox(
-                  width: 600.0,
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    )),
-                    onPressed: () {
-                      _goToMovementPage(context, "substract", "Surtir Orden");
-                    },
-                    icon: const Icon(Icons.move_down),
-                    label: const Text("Surtir Orden"),
-                  ),
+                CustomIconButton(
+                  text: "Surtir Orden",
+                  icon: Icons.move_down,
+                  height: 50,
+                  width: buttonWidth,
+                  onPressed: () =>
+                      _goToMovementPage(context, "substract", "Surtir Orden"),
                 ),
                 const SizedBox(height: 20),
-                SizedBox(
-                  width: 600.0,
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    )),
-                    onPressed: () {
-                      _goToMovementPage(context, "add", "Añadir a Inventario");
-                    },
-                    icon: const Icon(Icons.move_up),
-                    label: const Text("Añadir a Inventario"),
-                  ),
+                CustomIconButton(
+                  text: "Añadir a Inventario",
+                  icon: Icons.move_up,
+                  height: 50,
+                  width: buttonWidth,
+                  onPressed: () =>
+                      _goToMovementPage(context, "add", "Añadir a Inventario"),
                 ),
               ],
             ),

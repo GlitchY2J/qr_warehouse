@@ -30,6 +30,16 @@ class DatabaseHelper {
     return _handleResponse(response);
   }
 
+  /// LOGIN METHOD
+  static Future<Map<String, dynamic>> login(
+      String endpoint, dynamic data) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/$endpoint'),
+      body: data,
+    );
+    return _handleResponse(response);
+  }
+
   /// HANDLE RESPONSE METHOD
   static Map<String, dynamic> _handleResponse(http.Response response) {
     if (response.statusCode == 200) {

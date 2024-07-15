@@ -22,4 +22,10 @@ class FormController {
     return await DatabaseHelper.post("update_record.php",
         {"table": "inventory", "values": values, "condition": condition});
   }
+
+  /// LOGIN
+  static Future<Map<String, dynamic>> loginUser(username, password) async {
+    return await DatabaseHelper.login(
+        "login.php", {"username": username, "password": password});
+  }
 }

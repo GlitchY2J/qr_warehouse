@@ -28,9 +28,11 @@ class _CustomCardState extends State<CustomCard> {
   late int min, max;
 
   Color backgroundColor = const Color(0xff323537);
-  Color greenBackground = Colors.green[400]!;
-  Color yellowBackground = Colors.amber[600]!;
-  Color redBackground = const Color(0xFFFF5252);
+  Color greenBackground = const Color(0xFF9ADE7B);
+  Color yellowBackground = const Color(0xFFFFBB64);
+  Color redBackground = const Color(0xFFF28585);
+  Color splashColor = const Color(0xFF433D8B);
+  Color cardTextColor = Colors.white70;
 
   @override
   void initState() {
@@ -61,9 +63,8 @@ class _CustomCardState extends State<CustomCard> {
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
-          splashColor: Colors.lightBlue[600],
+          splashColor: splashColor,
           onTap: () {
-            //debugPrint(widget.partsList["0"]);
             Navigator.of(context).push(
               CupertinoPageRoute(
                 builder: (BuildContext context) => DetailsPage(
@@ -90,8 +91,8 @@ class _CustomCardState extends State<CustomCard> {
                     ),
                     Text(
                       widget.location,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: cardTextColor,
                         fontSize: 16,
                       ),
                     ),
@@ -105,8 +106,8 @@ class _CustomCardState extends State<CustomCard> {
                       child: Text(
                         widget.description,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: cardTextColor,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -114,8 +115,8 @@ class _CustomCardState extends State<CustomCard> {
                     ),
                     Text(
                       widget.qty,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: cardTextColor,
                         fontSize: 15,
                       ),
                     ),
