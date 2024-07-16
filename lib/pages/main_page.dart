@@ -5,11 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:qr_warehouse/pages/inventory_form.dart';
 import 'package:qr_warehouse/pages/login_page.dart';
+import 'package:qr_warehouse/pages/movement_page.dart';
+import 'package:qr_warehouse/pages/movement_report.dart';
 import 'package:qr_warehouse/pages/query_page.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
 import 'package:qr_warehouse/widgets/custom_icon_button.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -50,17 +53,24 @@ class _MainPageState extends State<MainPage> {
     super.dispose();
   }
 
-  void handleClick(int item) {
+  void handleClick(int item) async {
     switch (item) {
       case 0:
-        navigator?.pushReplacement(
-            CupertinoPageRoute(builder: (BuildContext context) => LoginPage()));
+        {
+          SharedPreferences pref = await SharedPreferences.getInstance();
+          await pref.clear();
+          navigator?.pushReplacement(
+            CupertinoPageRoute(
+              builder: (BuildContext context) => LoginPage(),
+            ),
+          );
+        }
         break;
     }
   }
 
   Future<void> getMovements() async {
-    http.Response response = await FormController.getTable("movements");
+    http.Response response = await FormController.getMovements();
     setState(() {
       allmovements = jsonDecode(response.body);
       movements = allmovements;
@@ -71,7 +81,7 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-    final buttonWidth = (screenWidth / 2) - 40;
+    final buttonWidth = screenWidth * 0.3;
 
     return Scaffold(
       backgroundColor: const Color(0xFF2E236E),
@@ -115,7 +125,7 @@ class _MainPageState extends State<MainPage> {
           ),
           Positioned(
             top: 40,
-            left: 25,
+            left: 70,
             child: Row(
               children: [
                 // Add Part Number Button
@@ -134,115 +144,300 @@ class _MainPageState extends State<MainPage> {
                   icon: Icons.search,
                   height: 100,
                   width: buttonWidth,
-                  onPressed: () => Get.to(() => const QueryPage()),
+                  onPressed: () => {
+                    Navigator.of(context)
+                        .push(CupertinoPageRoute(
+                      builder: (context) => const QueryPage(),
+                    ))
+                        .then((value) {
+                      getMovements();
+                    })
+                  },
+                ),
+                const SizedBox(width: 30),
+
+                // Print Report
+                CustomIconButton(
+                  text: "Imprimir Reporte",
+                  icon: Icons.print,
+                  height: 100,
+                  width: buttonWidth,
+                  onPressed: () => {
+                    Navigator.of(context)
+                        .push(CupertinoPageRoute(
+                      builder: (context) => const MovementReport(),
+                    ))
+                        .then((value) {
+                      getMovements();
+                    })
+                  },
                 ),
               ],
             ),
           ),
           Positioned(
             top: screenHeight * 0.28,
-            left: screenWidth * 0.05,
-            width: screenWidth * 0.9,
+            left: screenWidth * 0.03,
+            width: screenWidth * 0.94,
             bottom: 10,
             child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 1,
-                  childAspectRatio: 6,
-                  mainAxisSpacing: 20,
-                ),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: screenWidth < 800 ? 1 : 2,
+                    childAspectRatio: screenWidth < 800 ? 6 : 8,
+                    mainAxisSpacing: 20,
+                    crossAxisSpacing: 20),
                 itemCount: movements.length < 20 ? movements.length : 20,
                 shrinkWrap: true,
                 physics: const ScrollPhysics(),
                 itemBuilder: (context, index) {
                   return Stack(
                     children: [
-                      Positioned(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color:
-                                movements[index]["type"].toString() == "Entrada"
-                                    ? const Color(0xFFA1C398)
-                                    : const Color(0xFFFA7070),
-                            borderRadius: const BorderRadius.all(
-                              Radius.circular(30),
-                            ),
-                          ),
-                        ),
+                      /// CARD CONTAINER
+                      CardContainer(
+                        movements: movements,
+                        index: index,
                       ),
-                      Positioned(
-                        top: 15,
-                        left: 25,
-                        child: Text(
-                          movements[index]["partnumber"].toString(),
-                          style: const TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+
+                      /// PART NUMBER
+                      CardPartNumber(
+                        movements: movements,
+                        index: index,
                       ),
-                      const Positioned(
-                        top: 50,
-                        left: 40,
-                        child: Text(
-                          "Part Number Description",
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white54,
-                          ),
-                        ),
+
+                      /// PART DESCRIPTION
+                      CardDescription(
+                        movements: movements,
+                        index: index,
                       ),
-                      Positioned(
-                        top: 20,
-                        left: screenWidth / 2,
-                        child: movements[index]["type"].toString() == "Entrada"
-                            ? const Icon(
-                                Icons.arrow_circle_down,
-                                size: 50,
-                              )
-                            : const Icon(
-                                Icons.arrow_circle_up,
-                                size: 50,
-                              ),
+
+                      /// ARROW ICON
+                      CardArrowIcon(
+                        movements: movements,
+                        index: index,
                       ),
-                      Positioned(
-                        top: 25,
-                        left: (screenWidth / 2) + 55,
-                        child: Text(
-                          movements[index]["quantity"].toString(),
-                          style: const TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+
+                      /// QUANTITY TEXT
+                      CardQuantityText(
+                        movements: movements,
+                        index: index,
                       ),
-                      Positioned(
-                        top: 28,
-                        right: 30,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.1),
-                            borderRadius: const BorderRadius.all(
-                              Radius.circular(30),
-                            ),
-                          ),
-                          child: const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text(
-                              "WO: 10750",
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
+
+                      /// ORDER NUMBER
+                      CardOrderNumber(
+                        movements: movements,
+                        index: index,
+                      ),
+
+                      /// USERNAME
+                      CardUsername(
+                        movements: movements,
+                        index: index,
                       ),
                     ],
                   );
                 }),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class CardUsername extends StatelessWidget {
+  const CardUsername({
+    super.key,
+    required this.movements,
+    required this.index,
+  });
+
+  final List<dynamic> movements;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      bottom: 5,
+      right: 30,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(
+          movements[index]["username"].toString(),
+          style: const TextStyle(
+              fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+      ),
+    );
+  }
+}
+
+class CardOrderNumber extends StatelessWidget {
+  const CardOrderNumber({
+    super.key,
+    required this.movements,
+    required this.index,
+  });
+
+  final List<dynamic> movements;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: 10,
+      right: 30,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.1),
+          borderRadius: const BorderRadius.all(
+            Radius.circular(30),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            movements[index]["order_number"].toString(),
+            style: const TextStyle(
+                fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class CardQuantityText extends StatelessWidget {
+  const CardQuantityText({
+    super.key,
+    required this.movements,
+    required this.index,
+  });
+
+  final List<dynamic> movements;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: 34,
+      left: 380,
+      child: Text(
+        movements[index]["quantity"].toString(),
+        style: const TextStyle(
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+}
+
+class CardArrowIcon extends StatelessWidget {
+  const CardArrowIcon({
+    super.key,
+    required this.movements,
+    required this.index,
+  });
+
+  final List<dynamic> movements;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: 30,
+      left: 330,
+      child: movements[index]["type"].toString() == "Entrada"
+          ? const Icon(
+              Icons.arrow_circle_down,
+              size: 50,
+            )
+          : const Icon(
+              Icons.arrow_circle_up,
+              size: 50,
+            ),
+    );
+  }
+}
+
+class CardDescription extends StatelessWidget {
+  const CardDescription({
+    super.key,
+    required this.movements,
+    required this.index,
+  });
+
+  final List<dynamic> movements;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: 65,
+      left: 45,
+      child: Text(
+        movements[index]["description"].toString(),
+        style: const TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.bold,
+          color: Colors.white54,
+        ),
+      ),
+    );
+  }
+}
+
+class CardPartNumber extends StatelessWidget {
+  const CardPartNumber({
+    super.key,
+    required this.movements,
+    required this.index,
+  });
+
+  final List<dynamic> movements;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: 22,
+      left: 45,
+      child: Text(
+        movements[index]["partnumber"].toString(),
+        style: const TextStyle(
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+}
+
+class CardContainer extends StatelessWidget {
+  const CardContainer({
+    super.key,
+    required this.movements,
+    required this.index,
+  });
+
+  final List<dynamic> movements;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Container(
+          decoration: BoxDecoration(
+            color: movements[index]["type"].toString() == "Entrada"
+                ? const Color(0xFFA1C398)
+                : const Color(0xFFFA7070),
+            borderRadius: const BorderRadius.all(
+              Radius.circular(30),
+            ),
+          ),
+        ),
       ),
     );
   }

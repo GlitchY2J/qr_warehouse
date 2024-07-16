@@ -11,6 +11,7 @@ class CustomCard extends StatefulWidget {
     this.child,
     required this.partsList,
     super.key,
+    required this.ontap,
   });
 
   final Map<String, dynamic> partsList;
@@ -19,6 +20,7 @@ class CustomCard extends StatefulWidget {
   final String location;
   final String qty;
   final Widget? child;
+  final VoidCallback ontap;
 
   @override
   State<CustomCard> createState() => _CustomCardState();
@@ -65,13 +67,17 @@ class _CustomCardState extends State<CustomCard> {
           borderRadius: BorderRadius.circular(12),
           splashColor: splashColor,
           onTap: () {
-            Navigator.of(context).push(
+            Navigator.of(context)
+                .push(
               CupertinoPageRoute(
                 builder: (BuildContext context) => DetailsPage(
                   parts: widget.partsList,
                 ),
               ),
-            );
+            )
+                .then((value) {
+              widget.ontap;
+            });
           },
           child: Padding(
             padding: const EdgeInsets.all(15),

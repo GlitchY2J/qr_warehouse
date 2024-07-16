@@ -27,7 +27,7 @@ class LoginPage extends StatelessWidget {
     if (result["success"] == "true") {
       // Go to main page
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString("username", "jguerra");
+      prefs.setString("username", username);
 
       if (context.mounted) {
         Navigator.pushReplacement(context,

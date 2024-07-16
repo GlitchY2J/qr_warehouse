@@ -41,6 +41,13 @@ class DatabaseHelper {
     return _handleResponse(response);
   }
 
+  /// MOVEMENTS METHOD
+  static Future<http.Response> getMovements(String endpoint) async {
+    final response = await http.get(Uri.parse('$_baseUrl/$endpoint'));
+
+    return response;
+  }
+
   /// HANDLE RESPONSE METHOD
   static Map<String, dynamic> _handleResponse(http.Response response) {
     if (response.statusCode == 200) {

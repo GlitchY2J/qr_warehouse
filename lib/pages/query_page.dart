@@ -235,6 +235,7 @@ class _QueryPageState extends State<QueryPage> {
                             description: parts[index]["description"].toString(),
                             qty: parts[index]["quantity"].toString(),
                             partsList: parts[index],
+                            ontap: getPartNumbers,
                           ),
                         ),
                       ),

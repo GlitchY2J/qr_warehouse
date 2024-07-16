@@ -3,16 +3,12 @@ import 'package:qr_warehouse/http/http_client.dart';
 
 class FormController {
   /// INSERT RECORD
-  static Future<Map<String, dynamic>> processData(partNumber, description,
-      quantity, location, manufacter, mnfPartNumber) async {
-    String values =
-        "'$partNumber', '$description', $quantity, '$location', '$manufacter', '$mnfPartNumber'";
-
+  static Future<Map<String, dynamic>> insertRecords(table, values) async {
     return await DatabaseHelper.post(
-        "insert_record.php", {"table": "inventory", "values": values});
+        "insert_record.php", {"table": table, "values": values});
   }
 
-  /// GET INVENTORY
+  /// GET TABLE
   static Future<http.Response> getTable(table) async {
     return await DatabaseHelper.get("get_table.php", {"table": table});
   }
@@ -27,5 +23,10 @@ class FormController {
   static Future<Map<String, dynamic>> loginUser(username, password) async {
     return await DatabaseHelper.login(
         "login.php", {"username": username, "password": password});
+  }
+
+  /// GET MOVEMENTS DATA
+  static Future<http.Response> getMovements() async {
+    return await DatabaseHelper.getMovements("get_movements.php");
   }
 }

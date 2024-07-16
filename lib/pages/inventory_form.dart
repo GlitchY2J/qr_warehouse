@@ -33,14 +33,10 @@ class _InventoryFormPageState extends State<InventoryFormPage> {
   }
 
   addToInventory(context) async {
-    Map<String, dynamic> result = await FormController.processData(
-      partNumberController.text,
-      descriptionController.text,
-      quantityController.text,
-      locationController.text,
-      manufacterController.text,
-      mnfPartNumberController.text,
-    );
+    String values =
+        "${partNumberController.text}, ${descriptionController.text}, ${quantityController.text}, ${locationController.text}, ${locationController.text}, ${manufacterController.text}, ${mnfPartNumberController.text}";
+    Map<String, dynamic> result =
+        await FormController.insertRecords("inventory", values);
 
     SnackBar snackBar = SnackBar(
       content: result["success"] == "true"

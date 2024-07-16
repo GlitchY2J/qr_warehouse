@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MovementPage extends StatefulWidget {
   final Map<String, dynamic> parts;
@@ -39,8 +41,73 @@ class _MovementPageState extends State<MovementPage> {
     super.dispose();
   }
 
+  updateInventoryAndRecords(type) async {
+    // get current user
+    final pref = await SharedPreferences.getInstance();
+    final user = pref.getString("username");
+
+    // get and format datetime
+    final DateTime now = DateTime.now();
+    final dateTimeFormatter = DateFormat('yyyy-MM-dd HH:mm:ss');
+
+    final String formattedDateTime = dateTimeFormatter.format(now);
+
+    /// UPDATE
+
+    /// Calculating updated quantity
+    int quantity;
+    if (widget.action == "substract") {
+      quantity = qty - int.parse(quantityController.text);
+      type = "Salida";
+    } else {
+      quantity = qty + int.parse(quantityController.text);
+      type = "Entrada";
+    }
+
+    String values = "quantity = $quantity";
+
+    /// Setting up condition
+    String condition = "partnumber = '${widget.partnumber}'";
+
+    /// Updating Record
+    Map<String, dynamic> result =
+        await FormController.updateRecord(values, condition);
+
+    /// Creating snackbar
+    SnackBar snackBar;
+
+    /// If uptading inventory correctly then
+    if (result["success"] == "true") {
+      values =
+          "'DEFAULT', '${widget.partnumber.toString()}', '$type', ${int.parse(quantityController.text)}, '$user', '$formattedDateTime', '${orderController.text}', null, null";
+      result = await FormController.insertRecords("movements", values);
+
+      // If updateding movements correctly
+      if (result["success"] == "true") {
+        snackBar = const SnackBar(content: Text("Registro Completo."));
+        qty = quantity;
+        if (context.mounted) {
+          Navigator.pop(context, qty);
+        }
+      } else {
+        snackBar = const SnackBar(
+            content: Text("El registro no pudo ser completado."));
+      }
+    } else {
+      snackBar =
+          const SnackBar(content: Text("El registro no pudo ser completado."));
+    }
+
+    /// Showing message
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    String type = "";
+
     return Scaffold(
       appBar: AppBar(),
       body: SingleChildScrollView(
@@ -98,49 +165,7 @@ class _MovementPageState extends State<MovementPage> {
                             borderRadius: BorderRadius.circular(5.0),
                           )),
                           onPressed: () async {
-                            /// UPDATE
-
-                            /// Calculating updated quantity
-                            int quantity;
-                            if (widget.action == "substract") {
-                              quantity =
-                                  qty - int.parse(quantityController.text);
-                            } else {
-                              quantity =
-                                  qty + int.parse(quantityController.text);
-                            }
-
-                            String values = "quantity = $quantity";
-
-                            /// Setting up condition
-                            String condition =
-                                "partnumber = '${widget.partnumber}'";
-
-                            /// Updating Record
-                            Map<String, dynamic> result =
-                                await FormController.updateRecord(
-                                    values, condition);
-
-                            /// Creating snackbar
-                            SnackBar snackBar;
-
-                            /// Updating new quantity and snackbar content
-                            if (result["success"] == "true") {
-                              snackBar = const SnackBar(
-                                  content: Text("Registro Completo."));
-                              qty = quantity;
-                              if (context.mounted) Navigator.pop(context, qty);
-                            } else {
-                              snackBar = const SnackBar(
-                                  content: Text(
-                                      "El registro no pudo ser completado."));
-                            }
-
-                            /// Showing message
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(snackBar);
-                            }
+                            updateInventoryAndRecords(type);
                           },
                           icon: const Icon(Icons.check),
                           label: const Text("Confirmar"),
