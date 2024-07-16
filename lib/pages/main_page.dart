@@ -165,7 +165,9 @@ class _MainPageState extends State<MainPage> {
                   onPressed: () => {
                     Navigator.of(context)
                         .push(CupertinoPageRoute(
-                      builder: (context) => const MovementReport(),
+                      builder: (context) => MovementReport(
+                        movementsList: movements,
+                      ),
                     ))
                         .then((value) {
                       getMovements();
