@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:qr_warehouse/models/user.dart';
 import 'package:qr_warehouse/pages/main_page.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
 import 'package:qr_warehouse/widgets/app_text.dart';
@@ -7,6 +10,7 @@ import 'package:qr_warehouse/widgets/astro_logo.dart';
 import 'package:qr_warehouse/widgets/custom_button.dart';
 import 'package:qr_warehouse/widgets/custom_textfield.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
@@ -20,18 +24,20 @@ class LoginPage extends StatelessWidget {
     String password = passwordController.text;
 
     // Request access to database
-    Map<String, dynamic> result =
-        await FormController.loginUser(username, password);
+    http.Response response = await FormController.loginUser(username, password);
 
-    // If user exists go to the main page
-    if (result["success"] == "true") {
-      // Go to main page
+    if (response.statusCode == 200) {
+      // Create user object
+      User user = User.fromJson(jsonDecode(response.body));
+
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString("username", username);
+      prefs.setString("username", user.username);
+      prefs.setString("password", user.password);
+      prefs.setString("fullName", user.fullName);
 
       if (context.mounted) {
         Navigator.pushReplacement(context,
-            CupertinoPageRoute(builder: (context) => const MainPage()));
+            CupertinoPageRoute(builder: (context) => MainPage(user: user)));
       }
     } else {
       /// Create error message

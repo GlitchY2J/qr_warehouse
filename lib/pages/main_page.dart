@@ -1,22 +1,28 @@
 import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:qr_warehouse/models/user.dart';
 import 'package:qr_warehouse/pages/inventory_form.dart';
 import 'package:qr_warehouse/pages/login_page.dart';
-import 'package:qr_warehouse/pages/movement_page.dart';
 import 'package:qr_warehouse/pages/movement_report.dart';
 import 'package:qr_warehouse/pages/query_page.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
-import 'package:qr_warehouse/widgets/custom_icon_button.dart';
+import 'package:qr_warehouse/widgets/astrophysics_logo.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+  const MainPage({
+    super.key,
+    this.user,
+    this.prefs,
+  });
+
+  final User? user;
+  final SharedPreferences? prefs;
 
   @override
   State<MainPage> createState() => _MainPageState();
@@ -36,6 +42,7 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
+
     asyncInit();
   }
 
@@ -72,30 +79,100 @@ class _MainPageState extends State<MainPage> {
 
   Future<void> getMovements() async {
     http.Response response = await FormController.getMovements();
-    setState(() {
-      allmovements = jsonDecode(response.body);
-      movements = allmovements;
-    });
+    if (response.statusCode == 200) {
+      setState(() {
+        allmovements = jsonDecode(response.body);
+        movements = allmovements;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-    final buttonWidth = screenWidth * 0.3;
 
     return Scaffold(
+      drawer: Drawer(
+        width: 320,
+        backgroundColor: const Color(0xFF17153B),
+        child: ListView(
+          children: [
+            Stack(
+              children: [
+                const Positioned(
+                  top: 40,
+                  left: 30,
+                  child: AstrophysicsLogo(color: Colors.white, width: 250),
+                ),
+                Positioned(
+                  top: 100,
+                  left: 0,
+                  child: Container(
+                    width: 500,
+                    height: 60,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF17153B),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 25, top: 15),
+                      child: RichText(
+                        text: TextSpan(
+                          text: "Bienvenido, ",
+                          style: const TextStyle(fontSize: 20),
+                          children: <TextSpan>[
+                            TextSpan(
+                              text: widget.user?.fullName == null
+                                  ? widget.prefs?.getString("fullName")
+                                  : widget.user!.fullName,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFFC8ACD6),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  height: 160,
+                ),
+              ],
+            ),
+            ListTile(
+              leading: const Icon(Icons.add),
+              title: const Text("Añadir Número de Parte"),
+              onTap: () => {
+                Navigator.of(context)
+                    .push(CupertinoPageRoute(
+                  builder: (context) => const InventoryFormPage(),
+                ))
+                    .then((value) {
+                  getMovements();
+                })
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.search),
+              title: const Text("Inventario"),
+              onTap: () => {
+                Navigator.of(context)
+                    .push(CupertinoPageRoute(
+                  builder: (context) => const QueryPage(),
+                ))
+                    .then((value) {
+                  getMovements();
+                })
+              },
+            ),
+          ],
+        ),
+      ),
       backgroundColor: const Color(0xFF2E236E),
       appBar: AppBar(
         backgroundColor: const Color(0xFF2E236E),
-        leading: const Padding(
-          padding: EdgeInsets.only(left: 15, top: 10),
-          child: Icon(
-            Icons.menu,
-            color: Colors.white,
-            size: 32,
-          ),
-        ),
         actions: [
           PopupMenuButton(
             onSelected: (item) => handleClick(item),
@@ -118,64 +195,10 @@ class _MainPageState extends State<MainPage> {
               decoration: const BoxDecoration(
                 color: Color(0xFF17153B),
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
+                  topLeft: Radius.circular(50),
+                  topRight: Radius.circular(50),
                 ),
               ),
-            ),
-          ),
-          Positioned(
-            top: 40,
-            left: 70,
-            child: Row(
-              children: [
-                // Add Part Number Button
-                CustomIconButton(
-                  text: "Añadir Número de Parte",
-                  icon: Icons.add,
-                  height: 100,
-                  width: buttonWidth,
-                  onPressed: () => Get.to(() => const InventoryFormPage()),
-                ),
-                const SizedBox(width: 30),
-
-                // Query button
-                CustomIconButton(
-                  text: "Consultar",
-                  icon: Icons.search,
-                  height: 100,
-                  width: buttonWidth,
-                  onPressed: () => {
-                    Navigator.of(context)
-                        .push(CupertinoPageRoute(
-                      builder: (context) => const QueryPage(),
-                    ))
-                        .then((value) {
-                      getMovements();
-                    })
-                  },
-                ),
-                const SizedBox(width: 30),
-
-                // Print Report
-                CustomIconButton(
-                  text: "Imprimir Reporte",
-                  icon: Icons.print,
-                  height: 100,
-                  width: buttonWidth,
-                  onPressed: () => {
-                    Navigator.of(context)
-                        .push(CupertinoPageRoute(
-                      builder: (context) => MovementReport(
-                        movementsList: movements,
-                      ),
-                    ))
-                        .then((value) {
-                      getMovements();
-                    })
-                  },
-                ),
-              ],
             ),
           ),
           Positioned(
@@ -247,6 +270,24 @@ class _MainPageState extends State<MainPage> {
                 }),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color(0xFFC8ACD6),
+        onPressed: () => {
+          Navigator.of(context)
+              .push(CupertinoPageRoute(
+            builder: (context) => MovementReport(
+              movementsList: movements,
+            ),
+          ))
+              .then((value) {
+            getMovements();
+          })
+        },
+        child: const Icon(
+          Icons.table_chart,
+          color: Color(0xFF17153B),
+        ),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
 class DatabaseHelper {
@@ -32,13 +33,12 @@ class DatabaseHelper {
   }
 
   /// LOGIN METHOD
-  static Future<Map<String, dynamic>> login(
-      String endpoint, dynamic data) async {
+  static Future<http.Response> login(String endpoint, dynamic data) async {
     final response = await http.post(
       Uri.parse('$_baseUrl/$endpoint'),
       body: data,
     );
-    return _handleResponse(response);
+    return response;
   }
 
   /// MOVEMENTS METHOD

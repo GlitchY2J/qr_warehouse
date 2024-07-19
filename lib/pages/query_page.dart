@@ -92,10 +92,12 @@ class _QueryPageState extends State<QueryPage> {
 
   Future<void> getPartNumbers() async {
     http.Response response = await FormController.getTable("inventory");
-    setState(() {
-      allParts = jsonDecode(response.body);
-      parts = allParts;
-    });
+    if (response.statusCode == 200) {
+      setState(() {
+        allParts = jsonDecode(response.body);
+        parts = allParts;
+      });
+    }
   }
 
   void updatePartNumber(String text) {

@@ -57,7 +57,7 @@ class _QRCodePageState extends State<QRCodePage> {
         backgroundColor: const Color(0xFF17153B),
         actions: [
           IconButton(
-            onPressed: () => Get.offAll(() => const MainPage()),
+            onPressed: () => Navigator.pop(context),
             icon: const Icon(CupertinoIcons.clear),
           ),
         ],

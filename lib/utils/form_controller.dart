@@ -20,7 +20,7 @@ class FormController {
   }
 
   /// LOGIN
-  static Future<Map<String, dynamic>> loginUser(username, password) async {
+  static Future<http.Response> loginUser(username, password) async {
     return await DatabaseHelper.login(
         "login.php", {"username": username, "password": password});
   }
