@@ -23,6 +23,8 @@ dependencies:
   pointycastle: ^3.9.1
   flutter_svg: ^2.0.10+1
   shared_preferences: ^2.2.3
+  data_table_2: ^2.5.15
+  pdf: ^3.11.0
 
   # Icons
   iconsax: ^0.0.8

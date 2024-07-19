@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:qr_warehouse/pages/inventory_form.dart';
 import 'package:qr_warehouse/pages/login_page.dart';
 import 'package:qr_warehouse/pages/movement_page.dart';
@@ -235,11 +236,50 @@ class _MainPageState extends State<MainPage> {
                         movements: movements,
                         index: index,
                       ),
+
+                      /// Datetime
+                      CardDatetime(
+                        movements: movements,
+                        index: index,
+                      ),
                     ],
                   );
                 }),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class CardDatetime extends StatelessWidget {
+  const CardDatetime({
+    super.key,
+    required this.movements,
+    required this.index,
+  });
+
+  final List<dynamic> movements;
+  final int index;
+
+  String formatDate(date) {
+    DateTime dateTime = DateFormat("yyyy-MM-dd HH:mm:ss").parse(date);
+    String formatedDate = DateFormat("MM-dd-yyyy HH:mm").format(dateTime);
+    return formatedDate;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      bottom: 5,
+      right: 30,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(
+          formatDate(movements[index]["datetime"]),
+          style: const TextStyle(
+              fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
+        ),
       ),
     );
   }
@@ -258,7 +298,7 @@ class CardUsername extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      bottom: 5,
+      bottom: 20,
       right: 30,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
