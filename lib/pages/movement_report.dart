@@ -30,49 +30,49 @@ class _MovementReportState extends State<MovementReport> {
     _rows = filterData
         .map((row) => DataRow(cells: [
               DataCell(Text(
-                row['partnumber'],
+                row.partNumber,
                 style: const TextStyle(
                   color: Colors.black,
                   fontSize: 15,
                 ),
               )),
               DataCell(Text(
-                row['description'],
+                row.description,
                 style: const TextStyle(
                   color: Colors.black,
                   fontSize: 15,
                 ),
               )),
               DataCell(Text(
-                row['type'],
+                row.type,
                 style: const TextStyle(
                   color: Colors.black,
                   fontSize: 15,
                 ),
               )),
               DataCell(Text(
-                row['quantity'],
+                row.quantity,
                 style: const TextStyle(
                   color: Colors.black,
                   fontSize: 15,
                 ),
               )),
               DataCell(Text(
-                row['order_number'],
+                row.orderNumber,
                 style: const TextStyle(
                   color: Colors.black,
                   fontSize: 15,
                 ),
               )),
               DataCell(Text(
-                row['username'],
+                row.username,
                 style: const TextStyle(
                   color: Colors.black,
                   fontSize: 15,
                 ),
               )),
               DataCell(Text(
-                formatDate(row['datetime']),
+                formatDate(row.dateTime),
                 style: const TextStyle(
                   color: Colors.black,
                   fontSize: 15,
@@ -100,10 +100,10 @@ class _MovementReportState extends State<MovementReport> {
       setState(() {
         if (ascending) {
           filterData = filterData
-            ..sort((a, b) => a["partnumber"].compareTo(b["partnumber"]));
+            ..sort((a, b) => a.partNumber.compareTo(b.partNumber));
         } else {
           filterData = filterData
-            ..sort((a, b) => b["partnumber"].compareTo(a["partnumber"]));
+            ..sort((a, b) => b.partNumber.compareTo(a.partNumber));
         }
         this.ascending = ascending;
         sortColumnIndex = columnIndex;
@@ -112,10 +112,10 @@ class _MovementReportState extends State<MovementReport> {
       setState(() {
         if (ascending) {
           filterData = filterData
-            ..sort((a, b) => a["description"].compareTo(b["description"]));
+            ..sort((a, b) => a.description.compareTo(b.description));
         } else {
           filterData = filterData
-            ..sort((a, b) => b["description"].compareTo(a["description"]));
+            ..sort((a, b) => b.description.compareTo(a.description));
         }
         this.ascending = ascending;
         sortColumnIndex = columnIndex;
@@ -123,11 +123,9 @@ class _MovementReportState extends State<MovementReport> {
     } else if (columnIndex == 2) {
       setState(() {
         if (ascending) {
-          filterData = filterData
-            ..sort((a, b) => a["type"].compareTo(b["type"]));
+          filterData = filterData..sort((a, b) => a.type.compareTo(b.type));
         } else {
-          filterData = filterData
-            ..sort((a, b) => b["type"].compareTo(a["type"]));
+          filterData = filterData..sort((a, b) => b.type.compareTo(a.type));
         }
         this.ascending = ascending;
         sortColumnIndex = columnIndex;
@@ -136,10 +134,12 @@ class _MovementReportState extends State<MovementReport> {
       setState(() {
         if (ascending) {
           filterData = filterData
-            ..sort((a, b) => a["quantity"].compareTo(b["quantity"]));
+            ..sort((a, b) =>
+                int.parse(a.quantity).compareTo(int.parse(b.quantity)));
         } else {
           filterData = filterData
-            ..sort((a, b) => b["quantity"].compareTo(a["quantity"]));
+            ..sort((a, b) =>
+                int.parse(b.quantity).compareTo(int.parse(a.quantity)));
         }
         this.ascending = ascending;
         sortColumnIndex = columnIndex;
@@ -148,10 +148,12 @@ class _MovementReportState extends State<MovementReport> {
       setState(() {
         if (ascending) {
           filterData = filterData
-            ..sort((a, b) => a["order_number"].compareTo(b["order_number"]));
+            ..sort((a, b) =>
+                int.parse(a.orderNumber).compareTo(int.parse(b.orderNumber)));
         } else {
           filterData = filterData
-            ..sort((a, b) => b["order_number"].compareTo(a["order_number"]));
+            ..sort((a, b) =>
+                int.parse(b.orderNumber).compareTo(int.parse(a.orderNumber)));
         }
         this.ascending = ascending;
         sortColumnIndex = columnIndex;
@@ -160,10 +162,10 @@ class _MovementReportState extends State<MovementReport> {
       setState(() {
         if (ascending) {
           filterData = filterData
-            ..sort((a, b) => a["username"].compareTo(b["username"]));
+            ..sort((a, b) => a.username.compareTo(b.username));
         } else {
           filterData = filterData
-            ..sort((a, b) => b["username"].compareTo(a["username"]));
+            ..sort((a, b) => b.username.compareTo(a.username));
         }
         this.ascending = ascending;
         sortColumnIndex = columnIndex;
@@ -172,10 +174,10 @@ class _MovementReportState extends State<MovementReport> {
       setState(() {
         if (ascending) {
           filterData = filterData
-            ..sort((a, b) => a["datetime"].compareTo(b["datetime"]));
+            ..sort((a, b) => a.dateTime.compareTo(b.dateTime));
         } else {
           filterData = filterData
-            ..sort((a, b) => b["datetime"].compareTo(a["datetime"]));
+            ..sort((a, b) => b.dateTime.compareTo(a.dateTime));
         }
         this.ascending = ascending;
         sortColumnIndex = columnIndex;

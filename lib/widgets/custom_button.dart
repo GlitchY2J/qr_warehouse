@@ -5,16 +5,18 @@ class CustomButton extends StatelessWidget {
     super.key,
     required this.onTap,
     required this.text,
+    this.padding = const EdgeInsets.all(20),
   });
 
   final VoidCallback onTap;
   final String text;
+  final EdgeInsets? padding;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: padding,
       margin: const EdgeInsets.symmetric(horizontal: 60),
       decoration: BoxDecoration(
         //color: Colors.blue.shade400,

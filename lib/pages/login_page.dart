@@ -7,6 +7,7 @@ import 'package:qr_warehouse/pages/main_page.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
 import 'package:qr_warehouse/widgets/app_text.dart';
 import 'package:qr_warehouse/widgets/astro_logo.dart';
+import 'package:qr_warehouse/widgets/astrophysics_logo.dart';
 import 'package:qr_warehouse/widgets/custom_button.dart';
 import 'package:qr_warehouse/widgets/custom_textfield.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -26,14 +27,14 @@ class LoginPage extends StatelessWidget {
     // Request access to database
     http.Response response = await FormController.loginUser(username, password);
 
-    if (response.statusCode == 200) {
-      // Create user object
+    if (response.statusCode == 200 && response.body != "null") {
       User user = User.fromJson(jsonDecode(response.body));
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setString("username", user.username);
       prefs.setString("password", user.password);
       prefs.setString("fullName", user.fullName);
+      prefs.setString("userType", user.userType);
 
       if (context.mounted) {
         Navigator.pushReplacement(context,
@@ -73,10 +74,12 @@ class LoginPage extends StatelessWidget {
                 const SizedBox(height: 100),
 
                 // Logo
-                const AstroLogo(
-                  color: Colors.white,
-                  width: 120,
-                ),
+                screenWidth < 800
+                    ? const AstroLogo(
+                        color: Colors.white,
+                        width: 120,
+                      )
+                    : const AstrophysicsLogo(color: Colors.white, width: 650),
                 const SizedBox(height: 80),
 
                 // Login text
@@ -95,6 +98,9 @@ class LoginPage extends StatelessWidget {
                     hintText: "Usuario",
                     obscureText: false,
                     keyboardType: TextInputType.text,
+                    onSubmitted: (value) {
+                      loginRequestToDatabase(context);
+                    },
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -107,6 +113,9 @@ class LoginPage extends StatelessWidget {
                     hintText: "Contraseña",
                     obscureText: true,
                     keyboardType: TextInputType.text,
+                    onSubmitted: (value) {
+                      loginRequestToDatabase(context);
+                    },
                   ),
                 ),
                 const SizedBox(height: 30),

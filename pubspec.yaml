@@ -25,6 +25,10 @@ dependencies:
   shared_preferences: ^2.2.3
   data_table_2: ^2.5.15
   pdf: ^3.11.0
+  data_filters: ^1.0.2
+  filter_list: ^1.0.2
+  provider: ^6.0.0
+  dropdown_button2: ^2.3.9
 
   # Icons
   iconsax: ^0.0.8

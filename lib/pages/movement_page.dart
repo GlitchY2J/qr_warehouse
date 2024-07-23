@@ -120,7 +120,7 @@ class _MovementPageState extends State<MovementPage> {
                   child: Column(
                     children: [
                       Container(
-                        alignment: Alignment.centerLeft,
+                        alignment: Alignment.center,
                         child: Text(
                           widget.title,
                           style: const TextStyle(

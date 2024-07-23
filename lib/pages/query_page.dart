@@ -146,59 +146,98 @@ class _QueryPageState extends State<QueryPage> {
         child: Center(
           child: Column(
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    // Part Number
-                    flex: 3,
-                    child: CustomTextField(
-                      hintText: "Número de Parte",
-                      obscureText: false,
-                      keyboardType: TextInputType.text,
-                      onChanged: (String value) {
-                        updatePartNumber(value);
-                      },
+              Container(
+                width: screenWidth < 800 ? screenWidth : screenWidth * 0.3,
+                margin:
+                    const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
+                height: 61,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF17153B),
+                          borderRadius: BorderRadius.circular(8.0),
+                          border: Border.all(
+                            color: Colors.white,
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  decoration: InputDecoration(
+                                    hintText: "Número de Parte",
+                                    hintStyle:
+                                        TextStyle(color: Colors.grey[500]),
+                                    border: InputBorder.none,
+                                  ),
+                                  onChanged: (String value) {
+                                    updatePartNumber(value);
+                                  },
+                                ),
+                              ),
+                              screenWidth < 800
+                                  ? IconButton(
+                                      icon: const Icon(
+                                        Icons.qr_code,
+                                        color: Colors.white,
+                                      ),
+                                      onPressed: () =>
+                                          openScannerScreen("query"),
+                                    )
+                                  : Container(),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 25),
-                  Expanded(
-                    // QR Button
-                    flex: 1,
-                    child: CustomIconButton(
-                      text: screenWidth < 800 ? "" : "Escanea",
-                      icon: Icons.qr_code,
-                      height: 50,
-                      width: screenWidth,
-                      iconPadding: 12,
-                      onPressed: () => openScannerScreen("query"),
-                    ),
-                  )
-                ],
+                  ],
+                ),
               ),
 
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    // Description TextField
-                    flex: 3,
-                    child: // Description
-                        CustomTextField(
-                      hintText: "Descripción",
-                      obscureText: false,
-                      keyboardType: TextInputType.text,
-                      onChanged: (String value) {
-                        updateDescription(value);
-                      },
+              Container(
+                margin:
+                    const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
+                height: 61,
+                width: screenWidth < 800 ? screenWidth : screenWidth * 0.3,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF17153B),
+                          borderRadius: BorderRadius.circular(8.0),
+                          border: Border.all(
+                            color: Colors.white,
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  decoration: InputDecoration(
+                                    hintText: "Descripción",
+                                    hintStyle:
+                                        TextStyle(color: Colors.grey[500]),
+                                    border: InputBorder.none,
+                                  ),
+                                  onChanged: (String value) {
+                                    updateDescription(value);
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 25),
-                  Expanded(
-                    // QR Button
-                    flex: 1,
-                    child: Container(),
-                  )
-                ],
+                  ],
+                ),
               ),
               const SizedBox(height: 48),
               // Search Button
@@ -207,13 +246,14 @@ class _QueryPageState extends State<QueryPage> {
                 text: "Actualizar",
                 icon: Icons.refresh,
                 height: 50,
-                width: screenWidth,
+                width: screenWidth < 800 ? screenWidth : screenWidth * 0.3,
                 onPressed: asyncInit,
               ),
               const SizedBox(height: 48),
 
               SizedBox(
                 height: screenHeight - 400,
+                width: screenWidth < 800 ? screenWidth : screenWidth * 0.5,
                 child: ListView.builder(
                   scrollDirection: Axis.vertical,
                   shrinkWrap: true,
@@ -249,14 +289,16 @@ class _QueryPageState extends State<QueryPage> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFFC8ACD6),
-        onPressed: () => openScannerScreen("bulk"),
-        child: const Icon(
-          Icons.add,
-          color: Color(0xFF17153B),
-        ),
-      ),
+      floatingActionButton: screenWidth < 800
+          ? FloatingActionButton(
+              backgroundColor: const Color(0xFFC8ACD6),
+              onPressed: () => openScannerScreen("bulk"),
+              child: const Icon(
+                Icons.add,
+                color: Color(0xFF17153B),
+              ),
+            )
+          : Container(),
     );
   }
 }

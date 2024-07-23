@@ -1,8 +1,9 @@
 import 'dart:convert';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
+import 'package:qr_warehouse/models/movement.dart';
 import 'package:qr_warehouse/models/user.dart';
 import 'package:qr_warehouse/pages/inventory_form.dart';
 import 'package:qr_warehouse/pages/login_page.dart';
@@ -10,9 +11,11 @@ import 'package:qr_warehouse/pages/movement_report.dart';
 import 'package:qr_warehouse/pages/query_page.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
 import 'package:qr_warehouse/widgets/astrophysics_logo.dart';
-
 import 'package:http/http.dart' as http;
+import 'package:qr_warehouse/widgets/custom_button.dart';
+import 'package:qr_warehouse/widgets/movement_gridview.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:filter_list/filter_list.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({
@@ -29,38 +32,107 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  final partNumberController = TextEditingController();
-  final descriptionController = TextEditingController();
-  final quantityController = TextEditingController();
-  final locationController = TextEditingController();
-  final manufacterController = TextEditingController();
-  final mnfPartNumberController = TextEditingController();
+  // List to store movements from database
+  List<Movement> allMovements = [];
 
-  List allmovements = [];
-  List movements = [];
+  // List to store filtered moves
+  List<Movement> selectedMovementList = [];
 
   @override
   void initState() {
     super.initState();
-
-    asyncInit();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      asyncInit();
+    });
   }
 
   void asyncInit() async {
     await getMovements();
   }
 
-  @override
-  void dispose() {
-    partNumberController.dispose();
-    descriptionController.dispose();
-    quantityController.dispose();
-    locationController.dispose();
-    manufacterController.dispose();
-    mnfPartNumberController.dispose();
-    super.dispose();
+  // shows a dialog for filters
+  void movementFilters(String property) async {
+    await FilterListDialog.display<Movement>(
+      context,
+      themeData: FilterListThemeData.raw(
+        // Choice Chip theme
+        choiceChipTheme: const ChoiceChipThemeData(
+          backgroundColor: Color(0xFF433D8B),
+          selectedBackgroundColor: Color(0xFFC8ACD6),
+          side: BorderSide.none,
+        ),
+
+        // Header Theme
+        headerTheme: const HeaderThemeData(
+          backgroundColor: Color(0xFF17153B),
+          searchFieldBackgroundColor: Color(0xFF433D8B),
+          closeIconColor: Colors.white,
+          searchFieldIconColor: Colors.white,
+          searchFieldHintText: "Buscar...",
+        ),
+
+        // Control Button Bar Theme
+        controlBarButtonTheme: ControlButtonBarThemeData(context,
+            backgroundColor: const Color(0xFF433D8B),
+            controlButtonTheme: const ControlButtonThemeData(
+              primaryButtonBackgroundColor: Colors.black,
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              textStyle: TextStyle(
+                color: Colors.white,
+              ),
+            )),
+
+        borderRadius: 10,
+        wrapAlignment: WrapAlignment.start,
+        wrapCrossAxisAlignment: WrapCrossAlignment.start,
+        wrapSpacing: 10,
+        backgroundColor: const Color(0xFF17153B),
+      ),
+      applyButtonText: "Aplicar",
+      resetButtonText: "Reiniciar",
+      allButtonText: "Todos",
+      selectedItemsText: "selecionados",
+      width: 800,
+      height: 1000,
+      listData: selectedMovementList,
+      selectedListData: selectedMovementList,
+      choiceChipLabel: (move) => property == "Por Número de Parte"
+          ? move!.partNumber
+          : property == "Por Usuario"
+              ? move!.username
+              : property == "Por Movimiento"
+                  ? move!.type
+                  : property == "Por Orden"
+                      ? move!.orderNumber
+                      : property == "Por Fecha"
+                          ? move!.dateTime
+                          : null,
+      validateSelectedItem: (list, val) => list!.contains(val),
+      onItemSearch: (move, query) {
+        if (property == "Por Número de Parte") {
+          return move.partNumber.toLowerCase().contains(query.toLowerCase());
+        } else if (property == "Por Usuario") {
+          return move.username.toLowerCase().contains(query.toLowerCase());
+        } else if (property == "Por Movimiento") {
+          return move.type.toLowerCase().contains(query.toLowerCase());
+        } else if (property == "Por Orden") {
+          return move.orderNumber.toLowerCase().contains(query.toLowerCase());
+        } else if (property == "Por Fecha") {
+          return move.dateTime.toLowerCase().contains(query.toLowerCase());
+        } else {
+          return false;
+        }
+      },
+      onApplyButtonClick: (list) {
+        setState(() {
+          selectedMovementList = List.from(list!);
+        });
+        Navigator.pop(context);
+      },
+    );
   }
 
+  // handle events of 3 points menu
   void handleClick(int item) async {
     switch (item) {
       case 0:
@@ -77,18 +149,29 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
+  // function that get movements table from server
   Future<void> getMovements() async {
     http.Response response = await FormController.getMovements();
     if (response.statusCode == 200) {
       setState(() {
-        allmovements = jsonDecode(response.body);
-        movements = allmovements;
+        allMovements = List<Movement>.from(
+            jsonDecode(response.body).map((model) => Movement.fromJson(model)));
+        //movements = allMovements;
+        selectedMovementList = allMovements;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    String? selectedFilters;
+    final List<String> filters = [
+      "Por Número de Parte",
+      "Por Usuario",
+      "Por Movimiento",
+      "Por Orden",
+      "Por Fecha",
+    ];
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
@@ -141,23 +224,28 @@ class _MainPageState extends State<MainPage> {
                 ),
               ],
             ),
-            ListTile(
-              leading: const Icon(Icons.add),
-              title: const Text("Añadir Número de Parte"),
-              onTap: () => {
-                Navigator.of(context)
-                    .push(CupertinoPageRoute(
-                  builder: (context) => const InventoryFormPage(),
-                ))
-                    .then((value) {
-                  getMovements();
-                })
-              },
-            ),
+            widget.user?.userType == "Admin" ||
+                    widget.prefs?.getString("userType") == "Admin"
+                ? ListTile(
+                    leading: const Icon(Icons.add),
+                    title: const Text("Añadir Número de Parte"),
+                    onTap: () => {
+                      Navigator.pop(context),
+                      Navigator.of(context)
+                          .push(CupertinoPageRoute(
+                        builder: (context) => const InventoryFormPage(),
+                      ))
+                          .then((value) {
+                        getMovements();
+                      })
+                    },
+                  )
+                : Container(),
             ListTile(
               leading: const Icon(Icons.search),
               title: const Text("Inventario"),
               onTap: () => {
+                Navigator.pop(context),
                 Navigator.of(context)
                     .push(CupertinoPageRoute(
                   builder: (context) => const QueryPage(),
@@ -188,6 +276,90 @@ class _MainPageState extends State<MainPage> {
       body: Stack(
         children: [
           Positioned(
+            top: 10,
+            left: 55,
+            child: SizedBox(
+              width: 250,
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton2<String>(
+                  isExpanded: true,
+                  hint: const Expanded(
+                    child: Text(
+                      "Filtrar",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  items: filters
+                      .map((String filter) => DropdownMenuItem<String>(
+                            value: filter,
+                            child: Text(
+                              filter,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ))
+                      .toList(),
+                  value: selectedFilters,
+                  onChanged: (value) {
+                    movementFilters(value!);
+                    setState(() {
+                      selectedFilters = value;
+                    });
+                  },
+                  buttonStyleData: ButtonStyleData(
+                    height: 50,
+                    width: 160,
+                    padding: const EdgeInsets.only(left: 14, right: 14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF433D8B),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  dropdownStyleData: DropdownStyleData(
+                    maxHeight: 200,
+                    width: 200,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      color: const Color(0xFF433D8B),
+                    ),
+                    offset: const Offset(100, 0),
+                    scrollbarTheme: ScrollbarThemeData(
+                      radius: const Radius.circular(40),
+                      thickness: MaterialStateProperty.all(6),
+                      thumbVisibility: MaterialStateProperty.all(true),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          Positioned(
+            top: 60,
+            left: -20,
+            child: SizedBox(
+              width: 400,
+              child: CustomButton(
+                  onTap: () {
+                    setState(() {
+                      selectedMovementList = allMovements;
+                    });
+                  },
+                  text: "Reiniciar Filtros"),
+            ),
+          ),
+
+          /// DARKER BACKGROUND
+          Positioned(
             bottom: 0,
             width: screenWidth,
             height: screenHeight * 0.7,
@@ -201,83 +373,24 @@ class _MainPageState extends State<MainPage> {
               ),
             ),
           ),
-          Positioned(
-            top: screenHeight * 0.28,
-            left: screenWidth * 0.03,
-            width: screenWidth * 0.94,
-            bottom: 10,
-            child: GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: screenWidth < 800 ? 1 : 2,
-                    childAspectRatio: screenWidth < 800 ? 6 : 8,
-                    mainAxisSpacing: 20,
-                    crossAxisSpacing: 20),
-                itemCount: movements.length < 20 ? movements.length : 20,
-                shrinkWrap: true,
-                physics: const ScrollPhysics(),
-                itemBuilder: (context, index) {
-                  return Stack(
-                    children: [
-                      /// CARD CONTAINER
-                      CardContainer(
-                        movements: movements,
-                        index: index,
-                      ),
 
-                      /// PART NUMBER
-                      CardPartNumber(
-                        movements: movements,
-                        index: index,
-                      ),
-
-                      /// PART DESCRIPTION
-                      CardDescription(
-                        movements: movements,
-                        index: index,
-                      ),
-
-                      /// ARROW ICON
-                      CardArrowIcon(
-                        movements: movements,
-                        index: index,
-                      ),
-
-                      /// QUANTITY TEXT
-                      CardQuantityText(
-                        movements: movements,
-                        index: index,
-                      ),
-
-                      /// ORDER NUMBER
-                      CardOrderNumber(
-                        movements: movements,
-                        index: index,
-                      ),
-
-                      /// USERNAME
-                      CardUsername(
-                        movements: movements,
-                        index: index,
-                      ),
-
-                      /// Datetime
-                      CardDatetime(
-                        movements: movements,
-                        index: index,
-                      ),
-                    ],
-                  );
-                }),
+          /// MOVEMENT GRID
+          MovementGridView(
+            screenHeight: screenHeight,
+            screenWidth: screenWidth,
+            movements: selectedMovementList,
           ),
         ],
       ),
+
+      /// TABLE VIEW
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFFC8ACD6),
         onPressed: () => {
           Navigator.of(context)
               .push(CupertinoPageRoute(
             builder: (context) => MovementReport(
-              movementsList: movements,
+              movementsList: selectedMovementList,
             ),
           ))
               .then((value) {
@@ -287,239 +400,6 @@ class _MainPageState extends State<MainPage> {
         child: const Icon(
           Icons.table_chart,
           color: Color(0xFF17153B),
-        ),
-      ),
-    );
-  }
-}
-
-class CardDatetime extends StatelessWidget {
-  const CardDatetime({
-    super.key,
-    required this.movements,
-    required this.index,
-  });
-
-  final List<dynamic> movements;
-  final int index;
-
-  String formatDate(date) {
-    DateTime dateTime = DateFormat("yyyy-MM-dd HH:mm:ss").parse(date);
-    String formatedDate = DateFormat("MM-dd-yyyy HH:mm").format(dateTime);
-    return formatedDate;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      bottom: 5,
-      right: 30,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Text(
-          formatDate(movements[index]["datetime"]),
-          style: const TextStyle(
-              fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-      ),
-    );
-  }
-}
-
-class CardUsername extends StatelessWidget {
-  const CardUsername({
-    super.key,
-    required this.movements,
-    required this.index,
-  });
-
-  final List<dynamic> movements;
-  final int index;
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      bottom: 20,
-      right: 30,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Text(
-          movements[index]["username"].toString(),
-          style: const TextStyle(
-              fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-      ),
-    );
-  }
-}
-
-class CardOrderNumber extends StatelessWidget {
-  const CardOrderNumber({
-    super.key,
-    required this.movements,
-    required this.index,
-  });
-
-  final List<dynamic> movements;
-  final int index;
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      top: 10,
-      right: 30,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.1),
-          borderRadius: const BorderRadius.all(
-            Radius.circular(30),
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(
-            movements[index]["order_number"].toString(),
-            style: const TextStyle(
-                fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class CardQuantityText extends StatelessWidget {
-  const CardQuantityText({
-    super.key,
-    required this.movements,
-    required this.index,
-  });
-
-  final List<dynamic> movements;
-  final int index;
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      top: 34,
-      left: 380,
-      child: Text(
-        movements[index]["quantity"].toString(),
-        style: const TextStyle(
-          fontSize: 28,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-}
-
-class CardArrowIcon extends StatelessWidget {
-  const CardArrowIcon({
-    super.key,
-    required this.movements,
-    required this.index,
-  });
-
-  final List<dynamic> movements;
-  final int index;
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      top: 30,
-      left: 330,
-      child: movements[index]["type"].toString() == "Entrada"
-          ? const Icon(
-              Icons.arrow_circle_down,
-              size: 50,
-            )
-          : const Icon(
-              Icons.arrow_circle_up,
-              size: 50,
-            ),
-    );
-  }
-}
-
-class CardDescription extends StatelessWidget {
-  const CardDescription({
-    super.key,
-    required this.movements,
-    required this.index,
-  });
-
-  final List<dynamic> movements;
-  final int index;
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      top: 65,
-      left: 45,
-      child: Text(
-        movements[index]["description"].toString(),
-        style: const TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.bold,
-          color: Colors.white54,
-        ),
-      ),
-    );
-  }
-}
-
-class CardPartNumber extends StatelessWidget {
-  const CardPartNumber({
-    super.key,
-    required this.movements,
-    required this.index,
-  });
-
-  final List<dynamic> movements;
-  final int index;
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      top: 22,
-      left: 45,
-      child: Text(
-        movements[index]["partnumber"].toString(),
-        style: const TextStyle(
-          fontSize: 28,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-      ),
-    );
-  }
-}
-
-class CardContainer extends StatelessWidget {
-  const CardContainer({
-    super.key,
-    required this.movements,
-    required this.index,
-  });
-
-  final List<dynamic> movements;
-  final int index;
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Container(
-          decoration: BoxDecoration(
-            color: movements[index]["type"].toString() == "Entrada"
-                ? const Color(0xFFA1C398)
-                : const Color(0xFFFA7070),
-            borderRadius: const BorderRadius.all(
-              Radius.circular(30),
-            ),
-          ),
         ),
       ),
     );
