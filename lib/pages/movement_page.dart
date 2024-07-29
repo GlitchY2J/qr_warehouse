@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
+import 'package:qr_warehouse/widgets/custom_icon_button.dart';
+import 'package:qr_warehouse/widgets/custom_textfield.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MovementPage extends StatefulWidget {
@@ -106,78 +108,76 @@ class _MovementPageState extends State<MovementPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final double desktopPadding = screenWidth * 0.33;
+    final double mobilePadding = screenWidth * 0.10;
     String type = "";
 
     return Scaffold(
-      appBar: AppBar(),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 80),
-          child: Center(
-            child: Column(
-              children: [
-                Form(
-                  child: Column(
-                    children: [
-                      Container(
-                        alignment: Alignment.center,
-                        child: Text(
-                          widget.title,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 24),
-                        ),
+      backgroundColor: const Color(0xFF17153B),
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF17153B),
+      ),
+      body: Padding(
+        padding: EdgeInsets.symmetric(
+          vertical: 14,
+          horizontal: screenWidth < 800 ? mobilePadding : desktopPadding,
+        ),
+        child: Center(
+          child: Column(
+            children: [
+              Form(
+                child: Column(
+                  children: [
+                    Container(
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        widget.title,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 24),
                       ),
-                      const SizedBox(height: 20),
-                      // Part Number
-                      SizedBox(
-                        width: 600,
-                        child: TextFormField(
-                          controller: orderController,
-                          decoration: const InputDecoration(
-                            labelText: "Work Order/PO",
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
+                    ),
+                    const SizedBox(height: 50),
 
-                      // Description
-                      SizedBox(
-                        width: 600.0,
-                        child: TextFormField(
-                          controller: quantityController,
-                          decoration: const InputDecoration(
-                            labelText: "Cantidad",
-                          ),
-                          keyboardType: TextInputType.number,
-                          inputFormatters: <TextInputFormatter>[
-                            FilteringTextInputFormatter.digitsOnly
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 64),
+                    CustomTextField(
+                      controller: orderController,
+                      hintText: "Work Order/PO",
+                      obscureText: false,
+                      keyboardType: TextInputType.text,
+                    ),
+                    const SizedBox(height: 32),
 
-                      // Add Part Number Button
-                      SizedBox(
-                        width: 600.0,
-                        child: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5.0),
-                          )),
-                          onPressed: () async {
-                            updateInventoryAndRecords(type);
-                          },
-                          icon: const Icon(Icons.check),
-                          label: const Text("Confirmar"),
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-                      // Add Part Number Button
-                    ],
-                  ),
-                )
-              ],
-            ),
+                    CustomTextField(
+                      controller: quantityController,
+                      hintText: "Cantidad",
+                      obscureText: false,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: <TextInputFormatter>[
+                        FilteringTextInputFormatter.digitsOnly
+                      ],
+                    ),
+
+                    const SizedBox(height: 64),
+
+                    // Add Part Number Button
+
+                    CustomIconButton(
+                      text: "Confirmar",
+                      icon: Icons.check,
+                      height: 50,
+                      width: double.infinity,
+                      onPressed: () async {
+                        updateInventoryAndRecords(type);
+                      },
+                    ),
+
+                    const SizedBox(height: 32),
+                    // Add Part Number Button
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),

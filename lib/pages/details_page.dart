@@ -48,7 +48,11 @@ class _DetailsPageState extends State<DetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final buttonWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    final double desktopPadding = screenWidth * 0.22;
+    final double mobilePadding = screenWidth * 0.06;
+
     final String partNumber = widget.parts["0"];
     final String description = widget.parts["1"];
     final String location = widget.parts["5"];
@@ -60,7 +64,10 @@ class _DetailsPageState extends State<DetailsPage> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 80),
+          padding: EdgeInsets.symmetric(
+            vertical: 14,
+            horizontal: screenWidth < 800 ? mobilePadding : desktopPadding,
+          ),
           child: SizedBox(
             width: double.infinity,
             child: Column(
@@ -96,7 +103,7 @@ class _DetailsPageState extends State<DetailsPage> {
                   text: "Surtir Orden",
                   icon: Icons.move_down,
                   height: 50,
-                  width: buttonWidth,
+                  width: screenWidth,
                   onPressed: () =>
                       _goToMovementPage(context, "substract", "Surtir Orden"),
                 ),
@@ -105,7 +112,7 @@ class _DetailsPageState extends State<DetailsPage> {
                   text: "Añadir a Inventario",
                   icon: Icons.move_up,
                   height: 50,
-                  width: buttonWidth,
+                  width: screenWidth,
                   onPressed: () =>
                       _goToMovementPage(context, "add", "Añadir a Inventario"),
                 ),

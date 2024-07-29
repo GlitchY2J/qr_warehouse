@@ -1,21 +1,18 @@
 import 'dart:convert';
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:qr_warehouse/models/movement.dart';
 import 'package:qr_warehouse/models/user.dart';
-import 'package:qr_warehouse/pages/inventory_form.dart';
 import 'package:qr_warehouse/pages/login_page.dart';
-import 'package:qr_warehouse/pages/movement_report.dart';
-import 'package:qr_warehouse/pages/query_page.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
-import 'package:qr_warehouse/widgets/astrophysics_logo.dart';
 import 'package:http/http.dart' as http;
+import 'package:qr_warehouse/widgets/custom_bottom_sheet.dart';
 import 'package:qr_warehouse/widgets/custom_button.dart';
+import 'package:qr_warehouse/widgets/custom_drawer.dart';
+import 'package:qr_warehouse/widgets/custom_floating_action_button.dart';
 import 'package:qr_warehouse/widgets/movement_gridview.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:filter_list/filter_list.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({
@@ -24,6 +21,7 @@ class MainPage extends StatefulWidget {
     this.prefs,
   });
 
+  // Username and SharePreferences
   final User? user;
   final SharedPreferences? prefs;
 
@@ -36,7 +34,21 @@ class _MainPageState extends State<MainPage> {
   List<Movement> allMovements = [];
 
   // List to store filtered moves
-  List<Movement> selectedMovementList = [];
+  List<Movement> filteredMovements = [];
+
+  // List of filters
+  Map<String, List<String>> filters = {
+    'partNumber': [],
+    'username': [],
+    'orderNumber': [],
+    'type': [],
+  };
+
+  // unique values for filters
+  List<String> partNumbers = [];
+  List<String> users = [];
+  List<String> orders = [];
+  List<String> types = [];
 
   @override
   void initState() {
@@ -48,88 +60,88 @@ class _MainPageState extends State<MainPage> {
 
   void asyncInit() async {
     await getMovements();
+    filteredMovements = allMovements;
+    initializeFilters();
   }
 
-  // shows a dialog for filters
-  void movementFilters(String property) async {
-    await FilterListDialog.display<Movement>(
-      context,
-      themeData: FilterListThemeData.raw(
-        // Choice Chip theme
-        choiceChipTheme: const ChoiceChipThemeData(
-          backgroundColor: Color(0xFF433D8B),
-          selectedBackgroundColor: Color(0xFFC8ACD6),
-          side: BorderSide.none,
-        ),
+  // applies filters
+  List<Movement> applyFilters(
+      List<Movement> movements, Map<String, List<String>> filters) {
+    List<Movement> filteredMovements = movements;
 
-        // Header Theme
-        headerTheme: const HeaderThemeData(
-          backgroundColor: Color(0xFF17153B),
-          searchFieldBackgroundColor: Color(0xFF433D8B),
-          closeIconColor: Colors.white,
-          searchFieldIconColor: Colors.white,
-          searchFieldHintText: "Buscar...",
-        ),
+    filters.forEach((filter, value) {
+      if (value.isNotEmpty) {
+        filteredMovements = filteredMovements.where((move) {
+          if (filter == 'partNumber') return value.contains(move.partNumber);
+          if (filter == 'username') return value.contains(move.username);
+          if (filter == 'orderNumber') return value.contains(move.orderNumber);
+          if (filter == 'type') return value.contains(move.type);
+          return true;
+        }).toList();
+      }
+    });
 
-        // Control Button Bar Theme
-        controlBarButtonTheme: ControlButtonBarThemeData(context,
-            backgroundColor: const Color(0xFF433D8B),
-            controlButtonTheme: const ControlButtonThemeData(
-              primaryButtonBackgroundColor: Colors.black,
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              textStyle: TextStyle(
-                color: Colors.white,
-              ),
-            )),
+    return filteredMovements;
+  }
 
-        borderRadius: 10,
-        wrapAlignment: WrapAlignment.start,
-        wrapCrossAxisAlignment: WrapCrossAlignment.start,
-        wrapSpacing: 10,
-        backgroundColor: const Color(0xFF17153B),
-      ),
-      applyButtonText: "Aplicar",
-      resetButtonText: "Reiniciar",
-      allButtonText: "Todos",
-      selectedItemsText: "selecionados",
-      width: 800,
-      height: 1000,
-      listData: selectedMovementList,
-      selectedListData: selectedMovementList,
-      choiceChipLabel: (move) => property == "Por Número de Parte"
-          ? move!.partNumber
-          : property == "Por Usuario"
-              ? move!.username
-              : property == "Por Movimiento"
-                  ? move!.type
-                  : property == "Por Orden"
-                      ? move!.orderNumber
-                      : property == "Por Fecha"
-                          ? move!.dateTime
-                          : null,
-      validateSelectedItem: (list, val) => list!.contains(val),
-      onItemSearch: (move, query) {
-        if (property == "Por Número de Parte") {
-          return move.partNumber.toLowerCase().contains(query.toLowerCase());
-        } else if (property == "Por Usuario") {
-          return move.username.toLowerCase().contains(query.toLowerCase());
-        } else if (property == "Por Movimiento") {
-          return move.type.toLowerCase().contains(query.toLowerCase());
-        } else if (property == "Por Orden") {
-          return move.orderNumber.toLowerCase().contains(query.toLowerCase());
-        } else if (property == "Por Fecha") {
-          return move.dateTime.toLowerCase().contains(query.toLowerCase());
-        } else {
-          return false;
-        }
-      },
-      onApplyButtonClick: (list) {
-        setState(() {
-          selectedMovementList = List.from(list!);
-        });
-        Navigator.pop(context);
-      },
-    );
+  // restart filters
+  void restartFilters() {
+    setState(() {
+      initializeFilters();
+      filteredMovements = allMovements;
+    });
+  }
+
+  // initialize filters
+  void initializeFilters() {
+    setState(() {
+      partNumbers =
+          allMovements.map((move) => move.partNumber).toSet().toList();
+      users = allMovements.map((move) => move.username).toSet().toList();
+      orders = allMovements.map((move) => move.orderNumber).toSet().toList();
+      types = allMovements.map((move) => move.type).toSet().toList();
+
+      // Makes all checkboxes start checked
+      // filters['partNumber'] = List.from(partNumbers);
+      // filters['username'] = List.from(users);
+      // filters['orderNumber'] = List.from(orders);
+      // filters['type'] = List.from(types);
+    });
+  }
+
+  void updateUniqueValues() {
+    setState(() {
+      partNumbers =
+          allMovements.map((move) => move.partNumber).toSet().toList();
+      users = allMovements.map((move) => move.username).toSet().toList();
+      orders = allMovements.map((move) => move.orderNumber).toSet().toList();
+      types = allMovements.map((move) => move.type).toSet().toList();
+    });
+  }
+
+  // apply filters and update
+  void applyFiltersAndUpdate() {
+    setState(() {
+      filteredMovements = applyFilters(allMovements, filters);
+      updateUniqueValues();
+    });
+  }
+
+  void toggleFilter(String category, String value) {
+    setState(() {
+      if (filters[category]!.contains(value)) {
+        filters[category]!.remove(value);
+      } else {
+        filters[category]!.add(value);
+      }
+      //applyFiltersAndUpdate();
+    });
+  }
+
+  bool isValidFilter(String category, String value) {
+    final tempFilters = Map<String, List<String>>.from(filters);
+    tempFilters[category] = [value];
+    return applyFilters(allMovements, tempFilters).isNotEmpty;
   }
 
   // handle events of 3 points menu
@@ -157,106 +169,39 @@ class _MainPageState extends State<MainPage> {
         allMovements = List<Movement>.from(
             jsonDecode(response.body).map((model) => Movement.fromJson(model)));
         //movements = allMovements;
-        selectedMovementList = allMovements;
+        //selectedMovementList = allMovements;
       });
     }
   }
 
+  Function(bool?)? onCheckboxChange([String? field, String? value]) {
+    return isValidFilter(field!, value!)
+        ? (checked) {
+            {
+              setState(() {
+                toggleFilter(field, value);
+              });
+            }
+          }
+        : null;
+  }
+
   @override
   Widget build(BuildContext context) {
-    String? selectedFilters;
-    final List<String> filters = [
-      "Por Número de Parte",
-      "Por Usuario",
-      "Por Movimiento",
-      "Por Orden",
-      "Por Fecha",
-    ];
+    // user related variables
+    final String? userType = widget.user?.userType;
+    final String? savedUserType = widget.prefs?.getString("userType");
+
+    // resolution variables
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      drawer: Drawer(
-        width: 320,
-        backgroundColor: const Color(0xFF17153B),
-        child: ListView(
-          children: [
-            Stack(
-              children: [
-                const Positioned(
-                  top: 40,
-                  left: 30,
-                  child: AstrophysicsLogo(color: Colors.white, width: 250),
-                ),
-                Positioned(
-                  top: 100,
-                  left: 0,
-                  child: Container(
-                    width: 500,
-                    height: 60,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF17153B),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 25, top: 15),
-                      child: RichText(
-                        text: TextSpan(
-                          text: "Bienvenido, ",
-                          style: const TextStyle(fontSize: 20),
-                          children: <TextSpan>[
-                            TextSpan(
-                              text: widget.user?.fullName == null
-                                  ? widget.prefs?.getString("fullName")
-                                  : widget.user!.fullName,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFFC8ACD6),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Container(
-                  height: 160,
-                ),
-              ],
-            ),
-            widget.user?.userType == "Admin" ||
-                    widget.prefs?.getString("userType") == "Admin"
-                ? ListTile(
-                    leading: const Icon(Icons.add),
-                    title: const Text("Añadir Número de Parte"),
-                    onTap: () => {
-                      Navigator.pop(context),
-                      Navigator.of(context)
-                          .push(CupertinoPageRoute(
-                        builder: (context) => const InventoryFormPage(),
-                      ))
-                          .then((value) {
-                        getMovements();
-                      })
-                    },
-                  )
-                : Container(),
-            ListTile(
-              leading: const Icon(Icons.search),
-              title: const Text("Inventario"),
-              onTap: () => {
-                Navigator.pop(context),
-                Navigator.of(context)
-                    .push(CupertinoPageRoute(
-                  builder: (context) => const QueryPage(),
-                ))
-                    .then((value) {
-                  getMovements();
-                })
-              },
-            ),
-          ],
-        ),
+      drawer: CustomDrawer(
+        widget: widget,
+        userType: userType,
+        savedUserType: savedUserType,
+        getMovements: getMovements,
       ),
       backgroundColor: const Color(0xFF2E236E),
       appBar: AppBar(
@@ -276,73 +221,89 @@ class _MainPageState extends State<MainPage> {
       body: Stack(
         children: [
           Positioned(
-            top: 10,
-            left: 55,
+            top: 0,
+            left: 305,
             child: SizedBox(
-              width: 250,
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton2<String>(
-                  isExpanded: true,
-                  hint: const Expanded(
-                    child: Text(
-                      "Filtrar",
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  items: filters
-                      .map((String filter) => DropdownMenuItem<String>(
-                            value: filter,
-                            child: Text(
-                              filter,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ))
-                      .toList(),
-                  value: selectedFilters,
-                  onChanged: (value) {
-                    movementFilters(value!);
-                    setState(() {
-                      selectedFilters = value;
-                    });
-                  },
-                  buttonStyleData: ButtonStyleData(
-                    height: 50,
-                    width: 160,
-                    padding: const EdgeInsets.only(left: 14, right: 14),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF433D8B),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  dropdownStyleData: DropdownStyleData(
-                    maxHeight: 200,
-                    width: 200,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(14),
-                      color: const Color(0xFF433D8B),
-                    ),
-                    offset: const Offset(100, 0),
-                    scrollbarTheme: ScrollbarThemeData(
-                      radius: const Radius.circular(40),
-                      thickness: MaterialStateProperty.all(6),
-                      thumbVisibility: MaterialStateProperty.all(true),
-                    ),
-                  ),
-                ),
-              ),
+              width: 400,
+              child: CustomButton(
+                  onTap: () => {
+                        // initializes and shows bottom sheet
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return CustomBottomSheet(
+                              height: screenHeight,
+                              itemCount: partNumbers.length,
+                              values: partNumbers,
+                              filters: filters,
+                              field: 'partNumber',
+                              isValidFilter: isValidFilter,
+                              toggleFilter: toggleFilter,
+                              applyFiltersAndUpdate: applyFiltersAndUpdate,
+                            );
+                          },
+                        )
+                      },
+                  text: "Filtro PartNumber"),
             ),
           ),
 
+          Positioned(
+            top: 0,
+            left: 605,
+            child: SizedBox(
+              width: 400,
+              child: CustomButton(
+                  onTap: () => {
+                        // initializes and shows bottom sheet
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return CustomBottomSheet(
+                              height: screenHeight,
+                              itemCount: users.length,
+                              values: users,
+                              filters: filters,
+                              field: 'username',
+                              isValidFilter: isValidFilter,
+                              toggleFilter: toggleFilter,
+                              applyFiltersAndUpdate: applyFiltersAndUpdate,
+                            );
+                          },
+                        )
+                      },
+                  text: "Filtro User"),
+            ),
+          ),
+
+          Positioned(
+            top: 0,
+            left: 905,
+            child: SizedBox(
+              width: 400,
+              child: CustomButton(
+                  onTap: () => {
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return CustomBottomSheet(
+                              height: screenHeight,
+                              itemCount: orders.length,
+                              values: orders,
+                              filters: filters,
+                              field: 'orderNumber',
+                              isValidFilter: isValidFilter,
+                              toggleFilter: toggleFilter,
+                              applyFiltersAndUpdate: applyFiltersAndUpdate,
+                            );
+                          },
+                        )
+                      },
+                  text: "Filtro Order"),
+            ),
+          ),
+
+          /// Clear Filters Button
           Positioned(
             top: 60,
             left: -20,
@@ -350,15 +311,13 @@ class _MainPageState extends State<MainPage> {
               width: 400,
               child: CustomButton(
                   onTap: () {
-                    setState(() {
-                      selectedMovementList = allMovements;
-                    });
+                    restartFilters();
                   },
                   text: "Reiniciar Filtros"),
             ),
           ),
 
-          /// DARKER BACKGROUND
+          /// Darker background
           Positioned(
             bottom: 0,
             width: screenWidth,
@@ -374,33 +333,19 @@ class _MainPageState extends State<MainPage> {
             ),
           ),
 
-          /// MOVEMENT GRID
+          /// Movements grid view
           MovementGridView(
             screenHeight: screenHeight,
             screenWidth: screenWidth,
-            movements: selectedMovementList,
+            movements: filteredMovements,
           ),
         ],
       ),
 
-      /// TABLE VIEW
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFFC8ACD6),
-        onPressed: () => {
-          Navigator.of(context)
-              .push(CupertinoPageRoute(
-            builder: (context) => MovementReport(
-              movementsList: selectedMovementList,
-            ),
-          ))
-              .then((value) {
-            getMovements();
-          })
-        },
-        child: const Icon(
-          Icons.table_chart,
-          color: Color(0xFF17153B),
-        ),
+      /// Go to table view
+      floatingActionButton: CustomFloatingActionButton(
+        selectedMovementList: filteredMovements,
+        getMovements: getMovements,
       ),
     );
   }

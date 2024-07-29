@@ -28,7 +28,7 @@ dependencies:
   data_filters: ^1.0.2
   filter_list: ^1.0.2
   provider: ^6.0.0
-  dropdown_button2: ^2.3.9
+  dropdown_button2: ^2.2.0
 
   # Icons
   iconsax: ^0.0.8
