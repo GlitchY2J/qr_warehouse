@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -10,6 +11,7 @@ import 'package:http/http.dart' as http;
 import 'package:qr_warehouse/widgets/custom_bottom_sheet.dart';
 import 'package:qr_warehouse/widgets/custom_button.dart';
 import 'package:qr_warehouse/widgets/custom_drawer.dart';
+import 'package:qr_warehouse/widgets/custom_dropdown_button.dart';
 import 'package:qr_warehouse/widgets/custom_floating_action_button.dart';
 import 'package:qr_warehouse/widgets/movement_gridview.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -36,6 +38,14 @@ class _MainPageState extends State<MainPage> {
   // List to store filtered moves
   List<Movement> filteredMovements = [];
 
+  // List of filters for dropdownmenu
+  List<String> menuFilters = [
+    'Por Número de Parte',
+    'Por Usuario',
+    'Por Movimiento',
+    'Por Número de Orden'
+  ];
+
   // List of filters
   Map<String, List<String>> filters = {
     'partNumber': [],
@@ -45,10 +55,10 @@ class _MainPageState extends State<MainPage> {
   };
 
   // unique values for filters
-  List<String> partNumbers = [];
-  List<String> users = [];
-  List<String> orders = [];
-  List<String> types = [];
+  List<String> uniquePartNumbers = [];
+  List<String> uniqueUsers = [];
+  List<String> uniqueOrders = [];
+  List<String> uniqueTypes = [];
 
   @override
   void initState() {
@@ -61,7 +71,8 @@ class _MainPageState extends State<MainPage> {
   void asyncInit() async {
     await getMovements();
     filteredMovements = allMovements;
-    initializeFilters();
+    updateUniqueValues();
+    //initializeFilters();
   }
 
   // applies filters
@@ -87,35 +98,37 @@ class _MainPageState extends State<MainPage> {
   // restart filters
   void restartFilters() {
     setState(() {
-      initializeFilters();
+      // initializeFilters();
       filteredMovements = allMovements;
     });
   }
 
   // initialize filters
-  void initializeFilters() {
-    setState(() {
-      partNumbers =
-          allMovements.map((move) => move.partNumber).toSet().toList();
-      users = allMovements.map((move) => move.username).toSet().toList();
-      orders = allMovements.map((move) => move.orderNumber).toSet().toList();
-      types = allMovements.map((move) => move.type).toSet().toList();
+  // void initializeFilters() {
+  //   setState(() {
+  //     uniquePartNumbers =
+  //         allMovements.map((move) => move.partNumber).toSet().toList();
+  //     uniqueUsers = allMovements.map((move) => move.username).toSet().toList();
+  //     uniqueOrders = allMovements.map((move) => move.orderNumber).toSet().toList();
+  //     uniqueTypes = allMovements.map((move) => move.type).toSet().toList();
 
-      // Makes all checkboxes start checked
-      // filters['partNumber'] = List.from(partNumbers);
-      // filters['username'] = List.from(users);
-      // filters['orderNumber'] = List.from(orders);
-      // filters['type'] = List.from(types);
-    });
-  }
+  //     // Makes all checkboxes start checked
+  //     filters['partNumber'] = List.from(uniquePartNumbers);
+  //     filters['username'] = List.from(uniqueUsers);
+  //     filters['orderNumber'] = List.from(uniqueOrders);
+  //     filters['type'] = List.from(uniqueTypes);
+  //   });
+  // }
 
+  // updates unique values
   void updateUniqueValues() {
     setState(() {
-      partNumbers =
+      uniquePartNumbers =
           allMovements.map((move) => move.partNumber).toSet().toList();
-      users = allMovements.map((move) => move.username).toSet().toList();
-      orders = allMovements.map((move) => move.orderNumber).toSet().toList();
-      types = allMovements.map((move) => move.type).toSet().toList();
+      uniqueUsers = allMovements.map((move) => move.username).toSet().toList();
+      uniqueOrders =
+          allMovements.map((move) => move.orderNumber).toSet().toList();
+      uniqueTypes = allMovements.map((move) => move.type).toSet().toList();
     });
   }
 
@@ -127,6 +140,7 @@ class _MainPageState extends State<MainPage> {
     });
   }
 
+  // toggles filters
   void toggleFilter(String category, String value) {
     setState(() {
       if (filters[category]!.contains(value)) {
@@ -138,6 +152,7 @@ class _MainPageState extends State<MainPage> {
     });
   }
 
+  // check if filter is valid
   bool isValidFilter(String category, String value) {
     final tempFilters = Map<String, List<String>>.from(filters);
     tempFilters[category] = [value];
@@ -167,13 +182,13 @@ class _MainPageState extends State<MainPage> {
     if (response.statusCode == 200) {
       setState(() {
         allMovements = List<Movement>.from(
-            jsonDecode(response.body).map((model) => Movement.fromJson(model)));
-        //movements = allMovements;
-        //selectedMovementList = allMovements;
+          jsonDecode(response.body).map((model) => Movement.fromJson(model)),
+        );
       });
     }
   }
 
+  // triggers on checkbox change
   Function(bool?)? onCheckboxChange([String? field, String? value]) {
     return isValidFilter(field!, value!)
         ? (checked) {
@@ -197,13 +212,13 @@ class _MainPageState extends State<MainPage> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
+      backgroundColor: const Color(0xFF2E236E),
       drawer: CustomDrawer(
         widget: widget,
         userType: userType,
         savedUserType: savedUserType,
         getMovements: getMovements,
       ),
-      backgroundColor: const Color(0xFF2E236E),
       appBar: AppBar(
         backgroundColor: const Color(0xFF2E236E),
         actions: [
@@ -233,8 +248,8 @@ class _MainPageState extends State<MainPage> {
                           builder: (BuildContext context) {
                             return CustomBottomSheet(
                               height: screenHeight,
-                              itemCount: partNumbers.length,
-                              values: partNumbers,
+                              itemCount: uniquePartNumbers.length,
+                              values: uniquePartNumbers,
                               filters: filters,
                               field: 'partNumber',
                               isValidFilter: isValidFilter,
@@ -261,8 +276,8 @@ class _MainPageState extends State<MainPage> {
                           builder: (BuildContext context) {
                             return CustomBottomSheet(
                               height: screenHeight,
-                              itemCount: users.length,
-                              values: users,
+                              itemCount: uniqueUsers.length,
+                              values: uniqueUsers,
                               filters: filters,
                               field: 'username',
                               isValidFilter: isValidFilter,
@@ -288,8 +303,8 @@ class _MainPageState extends State<MainPage> {
                           builder: (BuildContext context) {
                             return CustomBottomSheet(
                               height: screenHeight,
-                              itemCount: orders.length,
-                              values: orders,
+                              itemCount: uniqueOrders.length,
+                              values: uniqueOrders,
                               filters: filters,
                               field: 'orderNumber',
                               isValidFilter: isValidFilter,
@@ -303,6 +318,27 @@ class _MainPageState extends State<MainPage> {
             ),
           ),
 
+          Positioned(
+            top: 10,
+            left: 10,
+            child: CustomDropDownButton(
+              menuFilters: menuFilters,
+              height: screenHeight,
+              //itemCount: uniquePartNumbers.length,
+              //values: uniquePartNumbers,
+              filters: filters,
+              isValidFilter: isValidFilter,
+              toggleFilter: toggleFilter,
+              applyFiltersAndUpdate: applyFiltersAndUpdate,
+              uniques: {
+                'partNumber': uniquePartNumbers,
+                'username': uniqueUsers,
+                'orderNumber': uniqueOrders,
+                'type': uniqueTypes,
+              },
+            ),
+          ),
+
           /// Clear Filters Button
           Positioned(
             top: 60,
@@ -310,10 +346,11 @@ class _MainPageState extends State<MainPage> {
             child: SizedBox(
               width: 400,
               child: CustomButton(
-                  onTap: () {
-                    restartFilters();
-                  },
-                  text: "Reiniciar Filtros"),
+                text: "Reiniciar Filtros",
+                onTap: () {
+                  restartFilters();
+                },
+              ),
             ),
           ),
 
