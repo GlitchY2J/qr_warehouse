@@ -9,7 +9,6 @@ import 'package:qr_warehouse/utils/form_controller.dart';
 import 'package:http/http.dart' as http;
 import 'package:qr_warehouse/widgets/custom_card.dart';
 import 'package:qr_warehouse/widgets/custom_icon_button.dart';
-import 'package:qr_warehouse/widgets/custom_textfield.dart';
 
 class QueryPage extends StatefulWidget {
   const QueryPage({super.key});
@@ -289,16 +288,16 @@ class _QueryPageState extends State<QueryPage> {
           ),
         ),
       ),
-      floatingActionButton: screenWidth < 800
-          ? FloatingActionButton(
-              backgroundColor: const Color(0xFFC8ACD6),
-              onPressed: () => openScannerScreen("bulk"),
-              child: const Icon(
-                Icons.add,
-                color: Color(0xFF17153B),
-              ),
-            )
-          : Container(),
+      // floatingActionButton: screenWidth < 800
+      //     ? FloatingActionButton(
+      //         backgroundColor: const Color(0xFFC8ACD6),
+      //         onPressed: () => openScannerScreen("bulk"),
+      //         child: const Icon(
+      //           Icons.add,
+      //           color: Color(0xFF17153B),
+      //         ),
+      //       )
+      //     : Container(),
     );
   }
 }

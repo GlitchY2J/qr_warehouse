@@ -7,10 +7,12 @@ import 'package:qr_warehouse/models/user.dart';
 import 'package:qr_warehouse/pages/login_page.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
 import 'package:http/http.dart' as http;
+import 'package:qr_warehouse/utils/formatters.dart';
 import 'package:qr_warehouse/widgets/custom_button.dart';
 import 'package:qr_warehouse/widgets/custom_drawer.dart';
 import 'package:qr_warehouse/widgets/custom_dropdown_button.dart';
 import 'package:qr_warehouse/widgets/custom_floating_action_button.dart';
+import 'package:qr_warehouse/widgets/custom_icon_button.dart';
 import 'package:qr_warehouse/widgets/movement_gridview.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -58,6 +60,10 @@ class _MainPageState extends State<MainPage> {
   List<String> uniqueOrders = [];
   List<String> uniqueTypes = [];
 
+  // dates
+  DateTime? startDate;
+  DateTime? endDate;
+
   @override
   void initState() {
     super.initState();
@@ -71,6 +77,25 @@ class _MainPageState extends State<MainPage> {
     filteredMovements = allMovements;
     updateUniqueValues();
     //initializeFilters();
+  }
+
+  void selectDate(BuildContext context, bool isStartDate) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      setState(() {
+        if (isStartDate) {
+          startDate = picked;
+        } else {
+          endDate = picked;
+        }
+        applyFiltersAndUpdate();
+      });
+    }
   }
 
   // applies filters
@@ -229,7 +254,7 @@ class _MainPageState extends State<MainPage> {
           // Dropwdown Button Filters
           CustomDropDownButton(
             top: 30,
-            left: 100,
+            left: screenWidth < 800 ? 55 : 125,
             menuFilters: menuFilters,
             height: screenHeight,
             filters: filters,
@@ -244,11 +269,41 @@ class _MainPageState extends State<MainPage> {
             },
           ),
 
+          // Fecha de Inicio
+          Positioned(
+            top: 40,
+            left: 450,
+            child: CustomIconButton(
+              height: 35,
+              width: 200,
+              text: startDate != null
+                  ? Formatters.formateDateFromDateTime(startDate!).split(' ')[0]
+                  : "Fecha Inicio",
+              icon: Icons.calendar_month,
+              onPressed: () => selectDate(context, true),
+            ),
+          ),
+
+          // Fecha Final
+          Positioned(
+            top: 100,
+            left: 450,
+            child: CustomIconButton(
+              height: 35,
+              width: 200,
+              text: endDate != null
+                  ? Formatters.formateDateFromDateTime(endDate!).split(' ')[0]
+                  : "Fecha Final",
+              icon: Icons.calendar_month,
+              onPressed: () => selectDate(context, false),
+            ),
+          ),
+
           /// Clear Filters Button
           CustomButton(
-            width: 400,
+            width: 300,
             top: 80,
-            left: 25,
+            left: screenWidth < 800 ? 30 : 100,
             text: "Reiniciar Filtros",
             onTap: () {
               restartFilters();

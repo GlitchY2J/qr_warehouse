@@ -1,13 +1,10 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:qr_warehouse/pages/main_page.dart';
 import 'package:qr_warehouse/widgets/custom_icon_button.dart';
 import 'package:qr_warehouse/widgets/qr_image_view.dart';
 

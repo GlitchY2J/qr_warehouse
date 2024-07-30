@@ -19,7 +19,7 @@ class DateTimeCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Text(
-          Formatters.formatDate(movements[index].dateTime),
+          Formatters.formatDateFromString(movements[index].dateTime),
           style: const TextStyle(
               fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
         ),

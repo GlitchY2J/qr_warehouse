@@ -37,6 +37,7 @@ dependencies:
 
     # State Management
   get: ^4.6.5
+  syncfusion_flutter_sliders: 25.2.7
 
 # ----------------------------- PACKAGES END ------------------------------------#
 dev_dependencies:

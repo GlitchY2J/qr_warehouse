@@ -35,7 +35,7 @@ class CustomBottomSheet extends StatelessWidget {
             Expanded(
               flex: 5,
               child: Padding(
-                padding: const EdgeInsets.only(top: 10, left: 10),
+                padding: const EdgeInsets.only(top: 10),
                 child: ListView.builder(
                   scrollDirection: Axis.vertical,
                   shrinkWrap: true,

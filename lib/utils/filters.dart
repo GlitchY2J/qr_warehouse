@@ -60,7 +60,7 @@ class Filters {
                   : property == "Por Orden"
                       ? move!.orderNumber
                       : property == "Por Fecha"
-                          ? Formatters.formatDate(move!.dateTime)
+                          ? Formatters.formatDateFromString(move!.dateTime)
                           : null,
       validateSelectedItem: (list, val) => list!.contains(val),
       onItemSearch: (move, query) {
@@ -73,7 +73,7 @@ class Filters {
         } else if (property == "Por Orden") {
           return move.orderNumber.toLowerCase().contains(query.toLowerCase());
         } else if (property == "Por Fecha") {
-          return Formatters.formatDate(move.dateTime)
+          return Formatters.formatDateFromString(move.dateTime)
               .toLowerCase()
               .contains(query.toLowerCase());
         } else {
