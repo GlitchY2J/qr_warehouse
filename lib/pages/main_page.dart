@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -8,7 +7,6 @@ import 'package:qr_warehouse/models/user.dart';
 import 'package:qr_warehouse/pages/login_page.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
 import 'package:http/http.dart' as http;
-import 'package:qr_warehouse/widgets/custom_bottom_sheet.dart';
 import 'package:qr_warehouse/widgets/custom_button.dart';
 import 'package:qr_warehouse/widgets/custom_drawer.dart';
 import 'package:qr_warehouse/widgets/custom_dropdown_button.dart';
@@ -98,27 +96,20 @@ class _MainPageState extends State<MainPage> {
   // restart filters
   void restartFilters() {
     setState(() {
-      // initializeFilters();
+      initializeFilters();
       filteredMovements = allMovements;
     });
   }
 
-  // initialize filters
-  // void initializeFilters() {
-  //   setState(() {
-  //     uniquePartNumbers =
-  //         allMovements.map((move) => move.partNumber).toSet().toList();
-  //     uniqueUsers = allMovements.map((move) => move.username).toSet().toList();
-  //     uniqueOrders = allMovements.map((move) => move.orderNumber).toSet().toList();
-  //     uniqueTypes = allMovements.map((move) => move.type).toSet().toList();
-
-  //     // Makes all checkboxes start checked
-  //     filters['partNumber'] = List.from(uniquePartNumbers);
-  //     filters['username'] = List.from(uniqueUsers);
-  //     filters['orderNumber'] = List.from(uniqueOrders);
-  //     filters['type'] = List.from(uniqueTypes);
-  //   });
-  // }
+  void initializeFilters() {
+    setState(() {
+      // Makes all checkboxes start unchecked
+      filters['partNumber'] = [];
+      filters['username'] = [];
+      filters['orderNumber'] = [];
+      filters['type'] = [];
+    });
+  }
 
   // updates unique values
   void updateUniqueValues() {
@@ -235,123 +226,33 @@ class _MainPageState extends State<MainPage> {
       ),
       body: Stack(
         children: [
-          Positioned(
-            top: 0,
-            left: 305,
-            child: SizedBox(
-              width: 400,
-              child: CustomButton(
-                  onTap: () => {
-                        // initializes and shows bottom sheet
-                        showModalBottomSheet(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return CustomBottomSheet(
-                              height: screenHeight,
-                              itemCount: uniquePartNumbers.length,
-                              values: uniquePartNumbers,
-                              filters: filters,
-                              field: 'partNumber',
-                              isValidFilter: isValidFilter,
-                              toggleFilter: toggleFilter,
-                              applyFiltersAndUpdate: applyFiltersAndUpdate,
-                            );
-                          },
-                        )
-                      },
-                  text: "Filtro PartNumber"),
-            ),
-          ),
-
-          Positioned(
-            top: 0,
-            left: 605,
-            child: SizedBox(
-              width: 400,
-              child: CustomButton(
-                  onTap: () => {
-                        // initializes and shows bottom sheet
-                        showModalBottomSheet(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return CustomBottomSheet(
-                              height: screenHeight,
-                              itemCount: uniqueUsers.length,
-                              values: uniqueUsers,
-                              filters: filters,
-                              field: 'username',
-                              isValidFilter: isValidFilter,
-                              toggleFilter: toggleFilter,
-                              applyFiltersAndUpdate: applyFiltersAndUpdate,
-                            );
-                          },
-                        )
-                      },
-                  text: "Filtro User"),
-            ),
-          ),
-
-          Positioned(
-            top: 0,
-            left: 905,
-            child: SizedBox(
-              width: 400,
-              child: CustomButton(
-                  onTap: () => {
-                        showModalBottomSheet(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return CustomBottomSheet(
-                              height: screenHeight,
-                              itemCount: uniqueOrders.length,
-                              values: uniqueOrders,
-                              filters: filters,
-                              field: 'orderNumber',
-                              isValidFilter: isValidFilter,
-                              toggleFilter: toggleFilter,
-                              applyFiltersAndUpdate: applyFiltersAndUpdate,
-                            );
-                          },
-                        )
-                      },
-                  text: "Filtro Order"),
-            ),
-          ),
-
-          Positioned(
-            top: 10,
-            left: 10,
-            child: CustomDropDownButton(
-              menuFilters: menuFilters,
-              height: screenHeight,
-              //itemCount: uniquePartNumbers.length,
-              //values: uniquePartNumbers,
-              filters: filters,
-              isValidFilter: isValidFilter,
-              toggleFilter: toggleFilter,
-              applyFiltersAndUpdate: applyFiltersAndUpdate,
-              uniques: {
-                'partNumber': uniquePartNumbers,
-                'username': uniqueUsers,
-                'orderNumber': uniqueOrders,
-                'type': uniqueTypes,
-              },
-            ),
+          // Dropwdown Button Filters
+          CustomDropDownButton(
+            top: 30,
+            left: 100,
+            menuFilters: menuFilters,
+            height: screenHeight,
+            filters: filters,
+            isValidFilter: isValidFilter,
+            toggleFilter: toggleFilter,
+            applyFiltersAndUpdate: applyFiltersAndUpdate,
+            uniques: {
+              'partNumber': uniquePartNumbers,
+              'username': uniqueUsers,
+              'orderNumber': uniqueOrders,
+              'type': uniqueTypes,
+            },
           ),
 
           /// Clear Filters Button
-          Positioned(
-            top: 60,
-            left: -20,
-            child: SizedBox(
-              width: 400,
-              child: CustomButton(
-                text: "Reiniciar Filtros",
-                onTap: () {
-                  restartFilters();
-                },
-              ),
-            ),
+          CustomButton(
+            width: 400,
+            top: 80,
+            left: 25,
+            text: "Reiniciar Filtros",
+            onTap: () {
+              restartFilters();
+            },
           ),
 
           /// Darker background
