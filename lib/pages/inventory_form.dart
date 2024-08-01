@@ -20,6 +20,7 @@ class _InventoryFormPageState extends State<InventoryFormPage> {
   final locationController = TextEditingController();
   final manufacterController = TextEditingController();
   final mnfPartNumberController = TextEditingController();
+  final measurementUnitController = TextEditingController();
 
   @override
   void dispose() {
@@ -29,12 +30,24 @@ class _InventoryFormPageState extends State<InventoryFormPage> {
     locationController.dispose();
     manufacterController.dispose();
     mnfPartNumberController.dispose();
+    measurementUnitController.dispose();
     super.dispose();
   }
 
   addToInventory(context) async {
+    String partNumber = partNumberController.text;
+    String description = descriptionController.text;
+    String measurementUnit = measurementUnitController.text;
+    String quantity = quantityController.text;
+    String min = "0";
+    String max = "100";
+    String location = locationController.text;
+    String manufacter = manufacterController.text;
+    String mnfPartNumber = mnfPartNumberController.text;
+    bool isActive = true;
+
     String values =
-        "${partNumberController.text}, ${descriptionController.text}, ${quantityController.text}, ${locationController.text}, ${locationController.text}, ${manufacterController.text}, ${mnfPartNumberController.text}";
+        "'$partNumber', '$description', '$measurementUnit', $quantity, $min, $max, '$location', '$manufacter', '$mnfPartNumber', $isActive";
     Map<String, dynamic> result =
         await FormController.insertRecords("inventory", values);
 
@@ -68,10 +81,7 @@ class _InventoryFormPageState extends State<InventoryFormPage> {
         backgroundColor: const Color(0xFF17153B),
       ),
       body: Padding(
-        padding: EdgeInsets.symmetric(
-          vertical: 14,
-          horizontal: screenWidth < 800 ? mobilePadding : desktopPadding,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 50),
         child: Center(
           child: Column(
             children: [
@@ -81,27 +91,25 @@ class _InventoryFormPageState extends State<InventoryFormPage> {
                     const SizedBox(height: 50),
                     // Part Number
                     CustomTextField(
+                      width: 600,
                       controller: partNumberController,
                       hintText: "Número de Parte",
-                      obscureText: false,
-                      keyboardType: TextInputType.text,
                     ),
                     const SizedBox(height: 16),
 
                     // Description
                     CustomTextField(
+                      width: 600,
                       controller: descriptionController,
                       hintText: "Descripción",
-                      obscureText: false,
-                      keyboardType: TextInputType.text,
                     ),
                     const SizedBox(height: 16),
 
                     // Quantity
                     CustomTextField(
+                      width: 600,
                       controller: quantityController,
                       hintText: "Cantidad",
-                      obscureText: false,
                       keyboardType: TextInputType.number,
                       inputFormatters: <TextInputFormatter>[
                         FilteringTextInputFormatter.digitsOnly
@@ -109,39 +117,44 @@ class _InventoryFormPageState extends State<InventoryFormPage> {
                     ),
                     const SizedBox(height: 16),
 
+                    // Measurement Unit
+                    CustomTextField(
+                      width: 600,
+                      controller: measurementUnitController,
+                      hintText: "Unidad de Medida",
+                    ),
+                    const SizedBox(height: 16),
+
                     // Location
                     CustomTextField(
+                      width: 600,
                       controller: locationController,
                       hintText: "Locación",
-                      obscureText: false,
-                      keyboardType: TextInputType.text,
                     ),
                     const SizedBox(height: 16),
 
                     // Manufacter
                     CustomTextField(
+                      width: 600,
                       controller: manufacterController,
                       hintText: "Proveedor",
-                      obscureText: false,
-                      keyboardType: TextInputType.text,
                     ),
                     const SizedBox(height: 16),
 
                     // Manufacter Part Number
                     CustomTextField(
+                      width: 600,
                       controller: mnfPartNumberController,
                       hintText: "Número de Parte del Proveedor",
-                      obscureText: false,
-                      keyboardType: TextInputType.text,
                     ),
                     const SizedBox(height: 100),
 
                     // Add Part Number Button
                     CustomIconButton(
+                      width: 600,
                       text: "Añadir al Inventario",
                       icon: Icons.add,
                       height: 50,
-                      width: double.infinity,
                       onPressed: () => addToInventory(context),
                     ),
                     const SizedBox(height: 32),
@@ -151,7 +164,7 @@ class _InventoryFormPageState extends State<InventoryFormPage> {
                       text: "Generar Código QR",
                       icon: Icons.qr_code_scanner,
                       height: 50,
-                      width: double.infinity,
+                      width: 600,
                       onPressed: () => generateQRCode(context),
                     ),
                   ],

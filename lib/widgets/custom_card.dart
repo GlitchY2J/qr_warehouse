@@ -1,24 +1,17 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:qr_warehouse/models/part_number.dart';
 import 'package:qr_warehouse/pages/details_page.dart';
 
 class CustomCard extends StatefulWidget {
   const CustomCard({
-    required this.partnumber,
-    required this.description,
-    required this.location,
-    required this.qty,
     this.child,
-    required this.partsList,
+    required this.partNumber,
     super.key,
     required this.ontap,
   });
 
-  final Map<String, dynamic> partsList;
-  final String partnumber;
-  final String description;
-  final String location;
-  final String qty;
+  final PartNumber partNumber;
   final Widget? child;
   final VoidCallback ontap;
 
@@ -38,8 +31,8 @@ class _CustomCardState extends State<CustomCard> {
 
   @override
   void initState() {
-    min = int.parse(widget.partsList["3"]);
-    max = int.parse(widget.partsList["4"]);
+    min = int.parse(widget.partNumber.min);
+    max = int.parse(widget.partNumber.max);
     super.initState();
   }
 
@@ -54,12 +47,14 @@ class _CustomCardState extends State<CustomCard> {
         borderRadius: BorderRadius.circular(12),
       ),
       child: Material(
-        color: int.parse(widget.qty) >= max || int.parse(widget.qty) <= min
+        color: int.parse(widget.partNumber.quantity) >= max ||
+                int.parse(widget.partNumber.quantity) <= min
             ? redBackground
-            : int.parse(widget.qty) >= min &&
-                        int.parse(widget.qty) <= minratio + min ||
-                    int.parse(widget.qty) <= max &&
-                        int.parse(widget.qty) >= max - maxratio
+            : int.parse(widget.partNumber.quantity) >= min &&
+                        int.parse(widget.partNumber.quantity) <=
+                            minratio + min ||
+                    int.parse(widget.partNumber.quantity) <= max &&
+                        int.parse(widget.partNumber.quantity) >= max - maxratio
                 ? yellowBackground
                 : greenBackground,
         borderRadius: BorderRadius.circular(12),
@@ -71,7 +66,7 @@ class _CustomCardState extends State<CustomCard> {
                 .push(
               CupertinoPageRoute(
                 builder: (BuildContext context) => DetailsPage(
-                  parts: widget.partsList,
+                  partNumber: widget.partNumber,
                 ),
               ),
             )
@@ -88,7 +83,7 @@ class _CustomCardState extends State<CustomCard> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      widget.partnumber,
+                      widget.partNumber.partNumber,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 23,
@@ -96,7 +91,7 @@ class _CustomCardState extends State<CustomCard> {
                       ),
                     ),
                     Text(
-                      widget.location,
+                      widget.partNumber.location,
                       style: TextStyle(
                         color: cardTextColor,
                         fontSize: 16,
@@ -110,7 +105,7 @@ class _CustomCardState extends State<CustomCard> {
                     SizedBox(
                       width: 230,
                       child: Text(
-                        widget.description,
+                        widget.partNumber.description,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: cardTextColor,
@@ -120,7 +115,7 @@ class _CustomCardState extends State<CustomCard> {
                       ),
                     ),
                     Text(
-                      widget.qty,
+                      widget.partNumber.quantity,
                       style: TextStyle(
                         color: cardTextColor,
                         fontSize: 15,

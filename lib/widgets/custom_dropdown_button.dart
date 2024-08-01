@@ -134,6 +134,7 @@ class _CustomDropDownButtonState extends State<CustomDropDownButton> {
 
                 // show bottom sheet
                 showModalBottomSheet(
+                  backgroundColor: const Color(0xFF2E236E),
                   context: context,
                   builder: (BuildContext context) {
                     int itemCount = getItemCount(value!);

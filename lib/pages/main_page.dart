@@ -2,19 +2,19 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:qr_warehouse/models/movement.dart';
 import 'package:qr_warehouse/models/user.dart';
 import 'package:qr_warehouse/pages/login_page.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
 import 'package:http/http.dart' as http;
-import 'package:qr_warehouse/utils/formatters.dart';
 import 'package:qr_warehouse/widgets/custom_button.dart';
 import 'package:qr_warehouse/widgets/custom_drawer.dart';
 import 'package:qr_warehouse/widgets/custom_dropdown_button.dart';
 import 'package:qr_warehouse/widgets/custom_floating_action_button.dart';
-import 'package:qr_warehouse/widgets/custom_icon_button.dart';
 import 'package:qr_warehouse/widgets/movement_gridview.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({
@@ -61,11 +61,14 @@ class _MainPageState extends State<MainPage> {
   List<String> uniqueTypes = [];
 
   // dates
-  DateTime? startDate;
-  DateTime? endDate;
+  DateFormat dateFormat = DateFormat('MM-dd-yyyy');
+  late DateTime startDate;
+  late DateTime endDate;
 
   @override
   void initState() {
+    startDate = DateTime(2023, 1, 1);
+    endDate = DateTime.now();
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       asyncInit();
@@ -89,9 +92,9 @@ class _MainPageState extends State<MainPage> {
     if (picked != null) {
       setState(() {
         if (isStartDate) {
-          startDate = picked;
+          //startDate = '';
         } else {
-          endDate = picked;
+          //endDate = '';
         }
         applyFiltersAndUpdate();
       });
@@ -115,6 +118,11 @@ class _MainPageState extends State<MainPage> {
       }
     });
 
+    filteredMovements = filteredMovements.where((move) {
+      DateTime dateTime = DateTime.parse(move.dateTime);
+      return dateTime.isAfter(startDate) && dateTime.isBefore(endDate);
+    }).toList();
+
     return filteredMovements;
   }
 
@@ -133,6 +141,8 @@ class _MainPageState extends State<MainPage> {
       filters['username'] = [];
       filters['orderNumber'] = [];
       filters['type'] = [];
+      startDate = DateTime(2023, 1, 1);
+      endDate = DateTime.now();
     });
   }
 
@@ -217,6 +227,71 @@ class _MainPageState extends State<MainPage> {
         : null;
   }
 
+  void onSelectionChanged(DateRangePickerSelectionChangedArgs args) {
+    if (args.value is PickerDateRange) {
+      startDate = args.value.startDate;
+      endDate = args.value.endDate ?? args.value.startDate;
+    }
+  }
+
+  Future<void> dialogBuilder(BuildContext context) {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF17153B),
+          title: const Text('Seleccionar Rango de Fecha'),
+          content: SizedBox(
+            width: 500,
+            height: 500,
+            child: ClipRRect(
+              borderRadius: const BorderRadius.all(Radius.circular(20)),
+              child: SfDateRangePicker(
+                monthFormat: "MMMM",
+                headerStyle: const DateRangePickerHeaderStyle(
+                  backgroundColor: Color(0xFF17153B),
+                ),
+                todayHighlightColor: const Color(0xFFC8ACD6),
+                rangeTextStyle: const TextStyle(color: Colors.white),
+                selectionColor: const Color(0xFFC8ACD6),
+                rangeSelectionColor: const Color(0xFF2E236E),
+                backgroundColor: const Color(0xFF17153B),
+                onSelectionChanged: onSelectionChanged,
+                selectionMode: DateRangePickerSelectionMode.range,
+                initialSelectedRange: PickerDateRange(
+                    DateTime.now().subtract(const Duration(days: 4)),
+                    DateTime.now().add(const Duration(days: 3))),
+              ),
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Aplicar'),
+              onPressed: () {
+                setState(() {
+                  applyFiltersAndUpdate();
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // user related variables
@@ -233,7 +308,7 @@ class _MainPageState extends State<MainPage> {
         widget: widget,
         userType: userType,
         savedUserType: savedUserType,
-        getMovements: getMovements,
+        refreshMovements: asyncInit,
       ),
       appBar: AppBar(
         backgroundColor: const Color(0xFF2E236E),
@@ -253,8 +328,8 @@ class _MainPageState extends State<MainPage> {
         children: [
           // Dropwdown Button Filters
           CustomDropDownButton(
-            top: 30,
-            left: screenWidth < 800 ? 55 : 125,
+            top: 0,
+            left: 65,
             menuFilters: menuFilters,
             height: screenHeight,
             filters: filters,
@@ -269,46 +344,63 @@ class _MainPageState extends State<MainPage> {
             },
           ),
 
-          // Fecha de Inicio
-          Positioned(
-            top: 40,
-            left: 450,
-            child: CustomIconButton(
-              height: 35,
-              width: 200,
-              text: startDate != null
-                  ? Formatters.formateDateFromDateTime(startDate!).split(' ')[0]
-                  : "Fecha Inicio",
-              icon: Icons.calendar_month,
-              onPressed: () => selectDate(context, true),
-            ),
-          ),
-
-          // Fecha Final
-          Positioned(
-            top: 100,
-            left: 450,
-            child: CustomIconButton(
-              height: 35,
-              width: 200,
-              text: endDate != null
-                  ? Formatters.formateDateFromDateTime(endDate!).split(' ')[0]
-                  : "Fecha Final",
-              icon: Icons.calendar_month,
-              onPressed: () => selectDate(context, false),
-            ),
-          ),
-
-          /// Clear Filters Button
           CustomButton(
-            width: 300,
-            top: 80,
-            left: screenWidth < 800 ? 30 : 100,
+            top: 50,
+            left: 40,
+            width: screenWidth < 800 ? 250 : 300,
             text: "Reiniciar Filtros",
             onTap: () {
               restartFilters();
             },
           ),
+
+          CustomButton(
+            top: 50,
+            left: screenWidth < 800 ? 300 : 350,
+            width: screenWidth < 800 ? 250 : 300,
+            text: "Rangos de Fecha",
+            onTap: () => dialogBuilder(context),
+          ),
+          // Positioned(
+          //   top: 80,
+          //   left: 40,
+          //   child: Row(
+          //     children: [
+          //       /// Clear Filters Button
+          //       CustomButton(
+          //         width: screenWidth < 800 ? 250 : 300,
+          //         text: "Reiniciar Filtros",
+          //         onTap: () {
+          //           restartFilters();
+          //         },
+          //       ),
+
+          //       // Shows calendar to select range of dates
+          //       CustomButton(
+          //         width: screenWidth < 800 ? 250 : 300,
+          //         text: "Rangos de Fecha",
+          //         onTap: () => dialogBuilder(context),
+          //       ),
+          //     ],
+          //   ),
+          // ),
+
+          // Positioned(
+          //   top: 200,
+          //   left: 100,
+          //   child: Chip(
+          //     label: Text(startDate.toString()),
+          //     onDeleted: () {},
+          //   ),
+          // ),
+          // Positioned(
+          //   top: 200,
+          //   left: 350,
+          //   child: Chip(
+          //     label: Text(endDate.toString()),
+          //     onDeleted: () {},
+          //   ),
+          // ),
 
           /// Darker background
           Positioned(

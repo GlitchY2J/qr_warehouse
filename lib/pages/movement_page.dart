@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:qr_warehouse/models/part_number.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
 import 'package:qr_warehouse/widgets/custom_icon_button.dart';
 import 'package:qr_warehouse/widgets/custom_textfield.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MovementPage extends StatefulWidget {
-  final Map<String, dynamic> parts;
-  final int quantity;
-  final String partnumber;
+  final PartNumber partNumber;
   final String action;
   final String title;
 
   const MovementPage(
       {super.key,
-      required this.parts,
-      required this.quantity,
-      required this.partnumber,
+      required this.partNumber,
       required this.action,
       required this.title});
 
@@ -26,13 +23,14 @@ class MovementPage extends StatefulWidget {
 }
 
 class _MovementPageState extends State<MovementPage> {
+  final formKey = GlobalKey<FormState>();
   int qty = 0;
   final orderController = TextEditingController();
   final quantityController = TextEditingController();
 
   @override
   void initState() {
-    qty = widget.quantity;
+    qty = int.parse(widget.partNumber.quantity);
     super.initState();
   }
 
@@ -69,7 +67,7 @@ class _MovementPageState extends State<MovementPage> {
     String values = "quantity = $quantity";
 
     /// Setting up condition
-    String condition = "partnumber = '${widget.partnumber}'";
+    String condition = "partnumber = '${widget.partNumber.partNumber}'";
 
     /// Updating Record
     Map<String, dynamic> result =
@@ -81,7 +79,7 @@ class _MovementPageState extends State<MovementPage> {
     /// If uptading inventory correctly then
     if (result["success"] == "true") {
       values =
-          "'DEFAULT', '${widget.partnumber.toString()}', '$type', ${int.parse(quantityController.text)}, '$user', '$formattedDateTime', '${orderController.text}', null, null";
+          "'DEFAULT', '${widget.partNumber.partNumber}', '$type', ${int.parse(quantityController.text)}, '$user', '$formattedDateTime', '${orderController.text}', null, null";
       result = await FormController.insertRecords("movements", values);
 
       // If updateding movements correctly
@@ -108,6 +106,9 @@ class _MovementPageState extends State<MovementPage> {
 
   @override
   Widget build(BuildContext context) {
+    bool validateWorkOrder = false;
+    bool validateQuantity = false;
+
     final screenWidth = MediaQuery.of(context).size.width;
     final double desktopPadding = screenWidth * 0.33;
     final double mobilePadding = screenWidth * 0.10;
@@ -128,6 +129,7 @@ class _MovementPageState extends State<MovementPage> {
           child: Column(
             children: [
               Form(
+                key: formKey,
                 child: Column(
                   children: [
                     Container(
@@ -140,23 +142,62 @@ class _MovementPageState extends State<MovementPage> {
                     ),
                     const SizedBox(height: 50),
 
-                    CustomTextField(
+                    // CustomTextField(
+                    //   controller: orderController,
+                    //   hintText: "Work Order/PO",
+                    // ),
+
+                    TextFormField(
                       controller: orderController,
-                      hintText: "Work Order/PO",
-                      obscureText: false,
-                      keyboardType: TextInputType.text,
+                      decoration: InputDecoration(
+                        hintText: 'Work Order',
+                        hintStyle: TextStyle(color: Colors.grey[500]),
+                        enabledBorder: const OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.blue.shade400),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Ingresa un Work Order';
+                        }
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 32),
 
-                    CustomTextField(
+                    TextFormField(
                       controller: quantityController,
-                      hintText: "Cantidad",
-                      obscureText: false,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: <TextInputFormatter>[
-                        FilteringTextInputFormatter.digitsOnly
-                      ],
+                      decoration: InputDecoration(
+                        hintText: 'Cantidad',
+                        hintStyle: TextStyle(color: Colors.grey[500]),
+                        enabledBorder: const OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.blue.shade400),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null ||
+                            value.isEmpty ||
+                            int.parse(value) < 1) {
+                          return 'Ingresa una cantidad válida';
+                        }
+                        return null;
+                      },
                     ),
+
+                    // CustomTextField(
+                    //   controller: quantityController,
+                    //   hintText: "Cantidad",
+                    //   keyboardType: TextInputType.number,
+                    //   inputFormatters: <TextInputFormatter>[
+                    //     FilteringTextInputFormatter.digitsOnly
+                    //   ],
+                    // ),
 
                     const SizedBox(height: 64),
 
@@ -168,7 +209,9 @@ class _MovementPageState extends State<MovementPage> {
                       height: 50,
                       width: double.infinity,
                       onPressed: () async {
-                        updateInventoryAndRecords(type);
+                        if (formKey.currentState!.validate()) {
+                          updateInventoryAndRecords(type);
+                        }
                       },
                     ),
 

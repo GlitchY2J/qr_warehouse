@@ -7,7 +7,7 @@ class Formatters {
     return formatedDate;
   }
 
-  static String formateDateFromDateTime(DateTime date) {
+  static String formatDateFromDateTime(DateTime date) {
     //DateTime dateTime = DateFormat("yyyy-MM-dd HH:mm:ss").parse(date);
     String formatedDate = DateFormat("MM-dd-yyyy HH:mm").format(date);
     return formatedDate;

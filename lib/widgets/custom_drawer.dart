@@ -11,13 +11,13 @@ class CustomDrawer extends StatelessWidget {
     required this.widget,
     required this.userType,
     required this.savedUserType,
-    required this.getMovements,
+    required this.refreshMovements,
   });
 
   final MainPage widget;
   final String? userType;
   final String? savedUserType;
-  final VoidCallback getMovements;
+  final VoidCallback refreshMovements;
 
   @override
   Widget build(BuildContext context) {
@@ -44,9 +44,9 @@ class CustomDrawer extends StatelessWidget {
             ],
           ),
           userType == "Admin" || savedUserType == "Admin"
-              ? AddPartNumberTile(getMovements: getMovements)
+              ? AddPartNumberTile(getMovements: refreshMovements)
               : Container(),
-          InventoryTile(getMovements: getMovements),
+          InventoryTile(refreshMovements: refreshMovements),
         ],
       ),
     );

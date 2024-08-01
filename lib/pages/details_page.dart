@@ -1,15 +1,17 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:qr_warehouse/models/part_number.dart';
+import 'package:qr_warehouse/pages/edit_page.dart';
 import 'package:qr_warehouse/pages/movement_page.dart';
 import 'package:qr_warehouse/widgets/app_text.dart';
 import 'package:qr_warehouse/widgets/custom_icon_button.dart';
 
 class DetailsPage extends StatefulWidget {
-  final Map<String, dynamic> parts;
+  final PartNumber partNumber;
 
   const DetailsPage({
     super.key,
-    required this.parts,
+    required this.partNumber,
   });
 
   @override
@@ -21,7 +23,7 @@ class _DetailsPageState extends State<DetailsPage> {
 
   @override
   void initState() {
-    quantity = int.parse(widget.parts["2"]);
+    quantity = int.parse(widget.partNumber.quantity);
     super.initState();
   }
 
@@ -30,9 +32,7 @@ class _DetailsPageState extends State<DetailsPage> {
       context,
       CupertinoPageRoute(
         builder: (context) => MovementPage(
-          parts: widget.parts,
-          quantity: quantity,
-          partnumber: widget.parts["0"],
+          partNumber: widget.partNumber,
           action: action,
           title: title,
         ),
@@ -53,9 +53,9 @@ class _DetailsPageState extends State<DetailsPage> {
     final double desktopPadding = screenWidth * 0.22;
     final double mobilePadding = screenWidth * 0.06;
 
-    final String partNumber = widget.parts["0"];
-    final String description = widget.parts["1"];
-    final String location = widget.parts["5"];
+    final String partNumber = widget.partNumber.partNumber;
+    final String description = widget.partNumber.description;
+    final String location = widget.partNumber.location;
 
     return Scaffold(
       backgroundColor: const Color(0xFF17153B),
@@ -87,16 +87,20 @@ class _DetailsPageState extends State<DetailsPage> {
                 const SizedBox(height: 16),
                 Container(
                   alignment: Alignment.topLeft,
-                  child:
-                      AppText(text: location, color: Colors.white60, size: 18),
+                  child: AppText(
+                    text: 'Locación: $location',
+                    color: Colors.white60,
+                    size: 18,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Container(
                   alignment: Alignment.topLeft,
                   child: AppText(
-                      text: quantity.toString(),
-                      color: Colors.white60,
-                      size: 18),
+                    text: 'Cantidad en Inventario: $quantity',
+                    color: Colors.white60,
+                    size: 18,
+                  ),
                 ),
                 const SizedBox(height: 64),
                 CustomIconButton(
@@ -115,6 +119,21 @@ class _DetailsPageState extends State<DetailsPage> {
                   width: screenWidth,
                   onPressed: () =>
                       _goToMovementPage(context, "add", "Añadir a Inventario"),
+                ),
+                const SizedBox(height: 20),
+                CustomIconButton(
+                  text: "Editar Número de Parte",
+                  icon: Icons.edit,
+                  height: 50,
+                  width: screenWidth,
+                  onPressed: () => Navigator.push(
+                    context,
+                    CupertinoPageRoute(
+                      builder: (context) => EditPage(
+                        partNumber: widget.partNumber,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),

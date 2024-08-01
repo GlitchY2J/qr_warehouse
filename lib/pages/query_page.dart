@@ -20,9 +20,11 @@ class QueryPage extends StatefulWidget {
 class _QueryPageState extends State<QueryPage> {
   String? scannedData;
   bool showDataTable = false;
-  List allParts = [];
-  List parts = [];
-  PartNumber partModel = PartNumber(partNumber: '', description: '');
+  List<PartNumber> allParts = [];
+  List<PartNumber> parts = [];
+  //PartNumber partModel = PartNumber(partNumber: '', description: '');
+  String filterPartNumber = '';
+  String filterDescription = '';
 
   @override
   void initState() {
@@ -83,7 +85,7 @@ class _QueryPageState extends State<QueryPage> {
       }
     } else {
       if (result != null) {
-        partModel.partNumber = result;
+        filterPartNumber = result;
         searchPartNumber();
       }
     }
@@ -93,34 +95,37 @@ class _QueryPageState extends State<QueryPage> {
     http.Response response = await FormController.getTable("inventory");
     if (response.statusCode == 200) {
       setState(() {
-        allParts = jsonDecode(response.body);
+        allParts = List<PartNumber>.from(jsonDecode(response.body)
+            .map((model) => PartNumber.fromJson(model)));
         parts = allParts;
       });
     }
   }
 
   void updatePartNumber(String text) {
-    partModel.partNumber = text;
+    filterPartNumber = text;
     searchPartNumber();
   }
 
   void updateDescription(String text) {
-    partModel.description = text;
+    filterDescription = text;
     searchPartNumber();
   }
 
   void searchPartNumber() {
     final suggestions = allParts.where((part) {
-      final partNumber = part["partnumber"].toLowerCase();
-      final description = part["description"].toLowerCase();
+      final partNumber = part.partNumber.toLowerCase();
+      final description = part.description.toLowerCase();
 
-      return (partNumber.contains(partModel.partNumber.toLowerCase()) &&
-              description.contains(partModel.description.toLowerCase())) ||
-          (description.contains(partModel.description.toLowerCase()) &&
-              partNumber.contains(partModel.partNumber.toLowerCase()));
+      return (partNumber.contains(filterPartNumber.toLowerCase()) &&
+              description.contains(filterDescription.toLowerCase())) ||
+          (description.contains(filterDescription.toLowerCase()) &&
+              partNumber.contains(filterPartNumber.toLowerCase()));
     }).toList();
 
-    setState(() => parts = suggestions);
+    setState(
+      () => parts = suggestions,
+    );
   }
 
   @override
@@ -258,29 +263,29 @@ class _QueryPageState extends State<QueryPage> {
                   shrinkWrap: true,
                   itemCount: parts.length < 20 ? parts.length : 20,
                   itemBuilder: (context, index) {
-                    return Material(
-                      type: MaterialType.transparency,
-                      elevation: 1.0,
-                      color: Colors.transparent,
-                      shadowColor: Colors.grey[50],
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 10,
-                          horizontal: 20,
-                        ),
-                        child: InkWell(
-                          onTap: () {},
-                          child: CustomCard(
-                            partnumber: parts[index]["partnumber"].toString(),
-                            location: parts[index]["location"].toString(),
-                            description: parts[index]["description"].toString(),
-                            qty: parts[index]["quantity"].toString(),
-                            partsList: parts[index],
-                            ontap: getPartNumbers,
+                    if (parts[index].isActive == '1') {
+                      return Material(
+                        type: MaterialType.transparency,
+                        elevation: 1.0,
+                        color: Colors.transparent,
+                        shadowColor: Colors.grey[50],
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 10,
+                            horizontal: 20,
+                          ),
+                          child: InkWell(
+                            onTap: () {},
+                            child: CustomCard(
+                              partNumber: parts[index],
+                              ontap: getPartNumbers,
+                            ),
                           ),
                         ),
-                      ),
-                    );
+                      );
+                    } else {
+                      return Container();
+                    }
                   },
                 ),
               ),

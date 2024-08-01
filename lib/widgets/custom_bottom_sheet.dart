@@ -35,7 +35,7 @@ class CustomBottomSheet extends StatelessWidget {
             Expanded(
               flex: 5,
               child: Padding(
-                padding: const EdgeInsets.only(top: 10),
+                padding: const EdgeInsets.only(top: 15, left: 10, right: 10),
                 child: ListView.builder(
                   scrollDirection: Axis.vertical,
                   shrinkWrap: true,
@@ -64,13 +64,51 @@ class CustomBottomSheet extends StatelessWidget {
               ),
             ),
             Expanded(
-                flex: 0,
-                child: CustomButton(
-                    onTap: () {
-                      applyFiltersAndUpdate();
-                      Navigator.pop(context);
-                    },
-                    text: "Aplicar"))
+              flex: 0,
+              child: SizedBox(
+                width: double.infinity,
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    //color: Colors.blue.shade400,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Material(
+                    color: const Color(0xFF433D8B),
+                    borderRadius: BorderRadius.circular(8),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: () {
+                        applyFiltersAndUpdate();
+                        Navigator.pop(context);
+                      },
+                      child: const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text(
+                            "Aplicar",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // child: CustomButton(
+            //     top: 0,
+            //     left: 0,
+            //     onTap: () {
+            //       applyFiltersAndUpdate();
+            //       Navigator.pop(context);
+            //     },
+            //     text: "Aplicar"),
           ],
         ),
       ),

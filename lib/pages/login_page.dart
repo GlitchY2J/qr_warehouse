@@ -57,7 +57,7 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
-    final double desktopPadding = screenWidth * 0.25;
+    final double desktopPadding = screenWidth * 0.35;
     final double mobilePadding = screenWidth * 0.1;
 
     return Scaffold(
@@ -121,12 +121,49 @@ class LoginPage extends StatelessWidget {
                 const SizedBox(height: 30),
 
                 // sign in button
-                CustomButton(
-                  onTap: () {
-                    loginRequestToDatabase(context);
-                  },
-                  text: "Iniciar Sesión",
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 60),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        //color: Colors.blue.shade400,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Material(
+                        color: const Color(0xFF433D8B),
+                        borderRadius: BorderRadius.circular(8),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(8),
+                          onTap: () {
+                            loginRequestToDatabase(context);
+                          },
+                          child: const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text(
+                                "Iniciar Sesión",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
+                // CustomButton(
+                //   onTap: () {
+                //     loginRequestToDatabase(context);
+                //   },
+                //   text: "Iniciar Sesión",
+                // ),
               ],
             ),
           ),

@@ -5,10 +5,10 @@ import 'package:qr_warehouse/pages/query_page.dart';
 class InventoryTile extends StatelessWidget {
   const InventoryTile({
     super.key,
-    required this.getMovements,
+    required this.refreshMovements,
   });
 
-  final VoidCallback getMovements;
+  final VoidCallback refreshMovements;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class InventoryTile extends StatelessWidget {
           builder: (context) => const QueryPage(),
         ))
             .then((value) {
-          getMovements();
+          refreshMovements();
         })
       },
     );
