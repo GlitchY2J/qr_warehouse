@@ -29,9 +29,7 @@ class _EditPageState extends State<EditPage> {
   late TextEditingController manufacterController;
   late TextEditingController mnfPartNumberController;
 
-  @override
-  void initState() {
-    super.initState();
+  void getPartNumberInTextField() {
     partNumberController =
         TextEditingController(text: widget.partNumber.partNumber);
     descriptionController =
@@ -48,9 +46,7 @@ class _EditPageState extends State<EditPage> {
         TextEditingController(text: widget.partNumber.mnfPartNumber);
   }
 
-  @override
-  void dispose() {
-    super.dispose();
+  void disposeTextControllers() {
     partNumberController.dispose();
     descriptionController.dispose();
     quantityController.dispose();
@@ -59,6 +55,55 @@ class _EditPageState extends State<EditPage> {
     locationController.dispose();
     manufacterController.dispose();
     mnfPartNumberController.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getPartNumberInTextField();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    disposeTextControllers();
+  }
+
+  void showMessage(String message) {
+    SnackBar snackBar;
+    snackBar = SnackBar(content: Text(message));
+
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  void returnToPreviousPage(PartNumber returnValue) {
+    Navigator.pop(context, returnValue);
+  }
+
+  PartNumber createNewPartNumber(
+    String partNumber,
+    String description,
+    String quantity,
+    String min,
+    String max,
+    String location,
+    String manufacter,
+    String mnfPartNumber,
+    String isActive,
+  ) {
+    PartNumber newPart = PartNumber(
+      partNumber: partNumber,
+      description: description,
+      quantity: quantity,
+      min: min,
+      max: max,
+      location: location,
+      manufacter: manufacter,
+      mnfPartNumber: mnfPartNumber,
+      isActive: isActive,
+    );
+
+    return newPart;
   }
 
   updatePartNumber() async {
@@ -72,30 +117,31 @@ class _EditPageState extends State<EditPage> {
     String manufacter = manufacterController.text;
     String mnfPartNumber = mnfPartNumberController.text;
 
+    // Create String to store message
+    String message = '';
+
     // create values and condition strings
     String values =
-        "description = '$description', quantity = $quantity, min = $min, max = $max, location = '$location', manufacter = '$manufacter', mnfpartnumber = '$mnfPartNumber', isActive = 1";
+        "description = '$description', min = $min, max = $max, location = '$location', manufacter = '$manufacter', mnfpartnumber = '$mnfPartNumber'";
     String condition = "partnumber = '$partNumber'";
 
-    /// Updating Record
+    // Updating Record
     Map<String, dynamic> result =
         await FormController.updateRecord(values, condition);
 
-    /// Creating snackbar
-    SnackBar snackBar;
-
+    // If the update was made correctly then show a success message and go back to previous page
     if (result["success"] == "true") {
-      snackBar = const SnackBar(content: Text("Actualización exitosa."));
-      navigator?.pop();
+      message = "Actualización exitosa.";
+      // Create a new Part Number to store all edited data
+      PartNumber myPartNumber = createNewPartNumber(partNumber, description,
+          quantity, min, max, location, manufacter, mnfPartNumber, '1');
+      // Return to previous page and get the new part number created with you
+      returnToPreviousPage(myPartNumber);
     } else {
-      snackBar = const SnackBar(
-          content: Text("La actualización no pudo ser completada."));
+      message = "La actualización no pudo ser completada.";
     }
-
-    /// Showing message
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    }
+    // Showing message
+    showMessage(message);
   }
 
   @override
@@ -104,24 +150,35 @@ class _EditPageState extends State<EditPage> {
       backgroundColor: const Color(0xFF17153B),
       appBar: AppBar(
         backgroundColor: const Color(0xFF17153B),
-        title: const Text("Editar número de parte"),
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 54, horizontal: 80),
+          padding: const EdgeInsets.symmetric(vertical: 54, horizontal: 100),
           child: Center(
             child: Column(
               children: [
                 Form(
                   child: Column(
                     children: [
-                      // Part Number
-                      CustomTextField(
+                      Container(
                         width: 600,
-                        labelText: "Número de Parte",
-                        controller: partNumberController,
+                        alignment: Alignment.topLeft,
+                        child: Text(
+                          "Editando ${widget.partNumber.partNumber}...",
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 24),
+                        ),
                       ),
-                      const SizedBox(height: 16),
+
+                      const SizedBox(height: 64),
+                      // Part Number
+                      // CustomTextField(
+                      //   width: 600,
+                      //   labelText: "Número de Parte",
+                      //   controller: partNumberController,
+                      //   enabled: false,
+                      // ),
+                      // const SizedBox(height: 16),
 
                       // Description
                       CustomTextField(
@@ -132,16 +189,17 @@ class _EditPageState extends State<EditPage> {
                       const SizedBox(height: 16),
 
                       // Quantity
-                      CustomTextField(
-                        width: 600,
-                        labelText: "Cantidad",
-                        controller: quantityController,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: <TextInputFormatter>[
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
-                      ),
-                      const SizedBox(height: 16),
+                      // CustomTextField(
+                      //   width: 600,
+                      //   labelText: "Cantidad",
+                      //   controller: quantityController,
+                      //   enabled: false,
+                      //   keyboardType: TextInputType.number,
+                      //   inputFormatters: <TextInputFormatter>[
+                      //     FilteringTextInputFormatter.digitsOnly
+                      //   ],
+                      // ),
+                      // const SizedBox(height: 16),
 
                       // Minimum inventory quantity
                       CustomTextField(
@@ -189,7 +247,7 @@ class _EditPageState extends State<EditPage> {
                         labelText: "Número de Parte del Proveedor",
                         controller: mnfPartNumberController,
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 64),
 
                       // Add Part Number Button
                       CustomIconButton(

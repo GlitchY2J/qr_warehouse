@@ -8,7 +8,7 @@ import 'package:qr_warehouse/models/user.dart';
 import 'package:qr_warehouse/pages/login_page.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
 import 'package:http/http.dart' as http;
-import 'package:qr_warehouse/widgets/custom_button.dart';
+import 'package:qr_warehouse/widgets/custom_positioned_button.dart';
 import 'package:qr_warehouse/widgets/custom_drawer.dart';
 import 'package:qr_warehouse/widgets/custom_dropdown_button.dart';
 import 'package:qr_warehouse/widgets/custom_floating_action_button.dart';
@@ -344,7 +344,7 @@ class _MainPageState extends State<MainPage> {
             },
           ),
 
-          CustomButton(
+          CustomPositionedButton(
             top: 50,
             left: 40,
             width: screenWidth < 800 ? 250 : 300,
@@ -354,53 +354,13 @@ class _MainPageState extends State<MainPage> {
             },
           ),
 
-          CustomButton(
+          CustomPositionedButton(
             top: 50,
             left: screenWidth < 800 ? 300 : 350,
             width: screenWidth < 800 ? 250 : 300,
             text: "Rangos de Fecha",
             onTap: () => dialogBuilder(context),
           ),
-          // Positioned(
-          //   top: 80,
-          //   left: 40,
-          //   child: Row(
-          //     children: [
-          //       /// Clear Filters Button
-          //       CustomButton(
-          //         width: screenWidth < 800 ? 250 : 300,
-          //         text: "Reiniciar Filtros",
-          //         onTap: () {
-          //           restartFilters();
-          //         },
-          //       ),
-
-          //       // Shows calendar to select range of dates
-          //       CustomButton(
-          //         width: screenWidth < 800 ? 250 : 300,
-          //         text: "Rangos de Fecha",
-          //         onTap: () => dialogBuilder(context),
-          //       ),
-          //     ],
-          //   ),
-          // ),
-
-          // Positioned(
-          //   top: 200,
-          //   left: 100,
-          //   child: Chip(
-          //     label: Text(startDate.toString()),
-          //     onDeleted: () {},
-          //   ),
-          // ),
-          // Positioned(
-          //   top: 200,
-          //   left: 350,
-          //   child: Chip(
-          //     label: Text(endDate.toString()),
-          //     onDeleted: () {},
-          //   ),
-          // ),
 
           /// Darker background
           Positioned(

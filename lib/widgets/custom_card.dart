@@ -8,12 +8,12 @@ class CustomCard extends StatefulWidget {
     this.child,
     required this.partNumber,
     super.key,
-    required this.ontap,
+    required this.getPartNumber,
   });
 
   final PartNumber partNumber;
   final Widget? child;
-  final VoidCallback ontap;
+  final VoidCallback getPartNumber;
 
   @override
   State<CustomCard> createState() => _CustomCardState();
@@ -46,6 +46,8 @@ class _CustomCardState extends State<CustomCard> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
       ),
+
+      // card color depending on min, max and quantity values
       child: Material(
         color: int.parse(widget.partNumber.quantity) >= max ||
                 int.parse(widget.partNumber.quantity) <= min
@@ -61,18 +63,14 @@ class _CustomCardState extends State<CustomCard> {
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
           splashColor: splashColor,
-          onTap: () {
-            Navigator.of(context)
-                .push(
+          onTap: () async {
+            await Navigator.of(context).push(
               CupertinoPageRoute(
                 builder: (BuildContext context) => DetailsPage(
                   partNumber: widget.partNumber,
                 ),
               ),
-            )
-                .then((value) {
-              widget.ontap;
-            });
+            );
           },
           child: Padding(
             padding: const EdgeInsets.all(15),

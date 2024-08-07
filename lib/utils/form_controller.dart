@@ -9,8 +9,9 @@ class FormController {
   }
 
   /// GET TABLE
-  static Future<http.Response> getTable(table) async {
-    return await DatabaseHelper.get("get_table.php", {"table": table});
+  static Future<http.Response> getTable(table, conditions) async {
+    return await DatabaseHelper.get(
+        "get_table.php", {"table": table, "conditions": conditions});
   }
 
   /// UPDATE RECORD

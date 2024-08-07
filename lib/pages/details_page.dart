@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:qr_warehouse/models/part_number.dart';
 import 'package:qr_warehouse/pages/edit_page.dart';
 import 'package:qr_warehouse/pages/movement_page.dart';
+import 'package:qr_warehouse/utils/form_controller.dart';
 import 'package:qr_warehouse/widgets/app_text.dart';
 import 'package:qr_warehouse/widgets/custom_icon_button.dart';
 
@@ -19,43 +20,67 @@ class DetailsPage extends StatefulWidget {
 }
 
 class _DetailsPageState extends State<DetailsPage> {
+  late PartNumber myPartNumber;
+  late String partNumber;
+  late String description;
+  late String location;
   late int quantity;
 
   @override
   void initState() {
-    quantity = int.parse(widget.partNumber.quantity);
+    myPartNumber = widget.partNumber;
+    setDetailsValues();
     super.initState();
   }
 
+  setDetailsValues() {
+    partNumber = myPartNumber.partNumber;
+    description = myPartNumber.description;
+    location = myPartNumber.location;
+    quantity = int.parse(myPartNumber.quantity);
+  }
+
   _goToMovementPage(BuildContext context, String action, String title) async {
-    final result = await Navigator.push(
+    await Navigator.push(
       context,
+      // Navigates to Movement Page
       CupertinoPageRoute(
         builder: (context) => MovementPage(
-          partNumber: widget.partNumber,
+          partNumber: myPartNumber,
           action: action,
           title: title,
         ),
       ),
-    );
 
-    if (result != null) {
-      setState(() {
-        quantity = result;
-      });
-    }
+      // If a movement was made then update UI
+    ).then((value) {
+      if (value != null) {
+        setState(() {
+          myPartNumber = value;
+        });
+      }
+      setDetailsValues();
+    });
+  }
+
+  disablePartNumber(String partNumber) async {
+    String values = "isActive = 0";
+    String condition = "partnumber = '$partNumber'";
+
+    // Updating Record
+    Map<String, dynamic> result =
+        await FormController.updateRecord(values, condition);
+
+    if (result["success"] == "true") {
+    } else {}
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
-    final double desktopPadding = screenWidth * 0.22;
+    final double desktopPadding = screenWidth * 0.32;
     final double mobilePadding = screenWidth * 0.06;
-
-    final String partNumber = widget.partNumber.partNumber;
-    final String description = widget.partNumber.description;
-    final String location = widget.partNumber.location;
 
     return Scaffold(
       backgroundColor: const Color(0xFF17153B),
@@ -79,12 +104,16 @@ class _DetailsPageState extends State<DetailsPage> {
                       AppText(text: partNumber, color: Colors.white, size: 38),
                 ),
                 const SizedBox(height: 16),
+
+                // Description
                 Container(
                   alignment: Alignment.topLeft,
                   child: AppText(
                       text: description, color: Colors.white60, size: 18),
                 ),
                 const SizedBox(height: 16),
+
+                // Location
                 Container(
                   alignment: Alignment.topLeft,
                   child: AppText(
@@ -94,6 +123,8 @@ class _DetailsPageState extends State<DetailsPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
+
+                // Quantitty
                 Container(
                   alignment: Alignment.topLeft,
                   child: AppText(
@@ -103,6 +134,8 @@ class _DetailsPageState extends State<DetailsPage> {
                   ),
                 ),
                 const SizedBox(height: 64),
+
+                // Button to add parts to order
                 CustomIconButton(
                   text: "Surtir Orden",
                   icon: Icons.move_down,
@@ -112,6 +145,8 @@ class _DetailsPageState extends State<DetailsPage> {
                       _goToMovementPage(context, "substract", "Surtir Orden"),
                 ),
                 const SizedBox(height: 20),
+
+                // Button to add parts to inventory
                 CustomIconButton(
                   text: "Añadir a Inventario",
                   icon: Icons.move_up,
@@ -121,6 +156,8 @@ class _DetailsPageState extends State<DetailsPage> {
                       _goToMovementPage(context, "add", "Añadir a Inventario"),
                 ),
                 const SizedBox(height: 20),
+
+                // Button to edit part number
                 CustomIconButton(
                   text: "Editar Número de Parte",
                   icon: Icons.edit,
@@ -133,7 +170,25 @@ class _DetailsPageState extends State<DetailsPage> {
                         partNumber: widget.partNumber,
                       ),
                     ),
-                  ),
+                  ).then((value) {
+                    if (value != null) {
+                      setState(() {
+                        myPartNumber = value;
+                      });
+                    }
+                    setDetailsValues();
+                  }),
+                ),
+                const SizedBox(height: 20),
+
+                // Button to delete part number (disable it)
+                CustomIconButton(
+                  text: "Eliminar Número de Parte",
+                  icon: Icons.delete,
+                  height: 50,
+                  width: screenWidth,
+                  backgroundColor: const Color(0xFFFA7070),
+                  onPressed: () => disablePartNumber(partNumber),
                 ),
               ],
             ),

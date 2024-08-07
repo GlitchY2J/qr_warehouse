@@ -14,6 +14,7 @@ class CustomTextField extends StatelessWidget {
     this.width,
     this.labelText,
     this.errorText,
+    this.enabled,
   });
 
   final TextEditingController? controller;
@@ -26,12 +27,14 @@ class CustomTextField extends StatelessWidget {
   final double? width;
   final String? labelText;
   final String? errorText;
+  final bool? enabled;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: width,
       child: TextField(
+        enabled: enabled,
         keyboardType: keyboardType,
         inputFormatters: inputFormatters,
         controller: controller,

@@ -1,36 +1,39 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_warehouse/models/part_number.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
 import 'package:qr_warehouse/widgets/custom_icon_button.dart';
-import 'package:qr_warehouse/widgets/custom_textfield.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MovementPage extends StatefulWidget {
+  // final variables for PartNumber object, action (Sum or Sub) and title(Add to Inventory or Add to Work Order)
   final PartNumber partNumber;
   final String action;
   final String title;
 
-  const MovementPage(
-      {super.key,
-      required this.partNumber,
-      required this.action,
-      required this.title});
+  const MovementPage({
+    super.key,
+    required this.partNumber,
+    required this.action,
+    required this.title,
+  });
 
   @override
   State<MovementPage> createState() => _MovementPageState();
 }
 
 class _MovementPageState extends State<MovementPage> {
+  // formKey to validate form
   final formKey = GlobalKey<FormState>();
-  int qty = 0;
+
+  // initial quantity
   final orderController = TextEditingController();
   final quantityController = TextEditingController();
 
   @override
   void initState() {
-    qty = int.parse(widget.partNumber.quantity);
     super.initState();
   }
 
@@ -42,6 +45,11 @@ class _MovementPageState extends State<MovementPage> {
   }
 
   updateInventoryAndRecords(type) async {
+    // create a reference for passed variables
+    int initialQuantity = int.parse(widget.partNumber.quantity);
+
+    String action = widget.action;
+
     // get current user
     final pref = await SharedPreferences.getInstance();
     final user = pref.getString("username");
@@ -55,16 +63,17 @@ class _MovementPageState extends State<MovementPage> {
     /// UPDATE
 
     /// Calculating updated quantity
-    int quantity;
-    if (widget.action == "substract") {
-      quantity = qty - int.parse(quantityController.text);
+    int finalQuantity;
+    if (action == "substract") {
+      finalQuantity = initialQuantity - int.parse(quantityController.text);
       type = "Salida";
     } else {
-      quantity = qty + int.parse(quantityController.text);
+      finalQuantity = initialQuantity + int.parse(quantityController.text);
       type = "Entrada";
     }
 
-    String values = "quantity = $quantity";
+    // values that are going to be updated in query
+    String values = "quantity = $finalQuantity";
 
     /// Setting up condition
     String condition = "partnumber = '${widget.partNumber.partNumber}'";
@@ -80,14 +89,27 @@ class _MovementPageState extends State<MovementPage> {
     if (result["success"] == "true") {
       values =
           "'DEFAULT', '${widget.partNumber.partNumber}', '$type', ${int.parse(quantityController.text)}, '$user', '$formattedDateTime', '${orderController.text}', null, null";
+
+      // Insert record into Movements table
       result = await FormController.insertRecords("movements", values);
 
       // If updateding movements correctly
       if (result["success"] == "true") {
         snackBar = const SnackBar(content: Text("Registro Completo."));
-        qty = quantity;
+
         if (context.mounted) {
-          Navigator.pop(context, qty);
+          PartNumber partNumber = PartNumber(
+            partNumber: widget.partNumber.partNumber,
+            description: widget.partNumber.description,
+            quantity: finalQuantity.toString(),
+            min: widget.partNumber.min,
+            max: widget.partNumber.max,
+            location: widget.partNumber.location,
+            manufacter: widget.partNumber.manufacter,
+            mnfPartNumber: widget.partNumber.mnfPartNumber,
+            isActive: widget.partNumber.isActive,
+          );
+          Navigator.pop(context, partNumber);
         }
       } else {
         snackBar = const SnackBar(
@@ -106,9 +128,6 @@ class _MovementPageState extends State<MovementPage> {
 
   @override
   Widget build(BuildContext context) {
-    bool validateWorkOrder = false;
-    bool validateQuantity = false;
-
     final screenWidth = MediaQuery.of(context).size.width;
     final double desktopPadding = screenWidth * 0.33;
     final double mobilePadding = screenWidth * 0.10;
@@ -117,9 +136,13 @@ class _MovementPageState extends State<MovementPage> {
     return Scaffold(
       backgroundColor: const Color(0xFF17153B),
       resizeToAvoidBottomInset: false,
+
+      // App Bar
       appBar: AppBar(
         backgroundColor: const Color(0xFF17153B),
       ),
+
+      // Sets body padding
       body: Padding(
         padding: EdgeInsets.symmetric(
           vertical: 14,
@@ -128,6 +151,7 @@ class _MovementPageState extends State<MovementPage> {
         child: Center(
           child: Column(
             children: [
+              // Form
               Form(
                 key: formKey,
                 child: Column(
@@ -142,11 +166,7 @@ class _MovementPageState extends State<MovementPage> {
                     ),
                     const SizedBox(height: 50),
 
-                    // CustomTextField(
-                    //   controller: orderController,
-                    //   hintText: "Work Order/PO",
-                    // ),
-
+                    // work order Textfield
                     TextFormField(
                       controller: orderController,
                       decoration: InputDecoration(
@@ -168,6 +188,7 @@ class _MovementPageState extends State<MovementPage> {
                     ),
                     const SizedBox(height: 32),
 
+                    // quantity text field
                     TextFormField(
                       controller: quantityController,
                       decoration: InputDecoration(
@@ -190,19 +211,10 @@ class _MovementPageState extends State<MovementPage> {
                       },
                     ),
 
-                    // CustomTextField(
-                    //   controller: quantityController,
-                    //   hintText: "Cantidad",
-                    //   keyboardType: TextInputType.number,
-                    //   inputFormatters: <TextInputFormatter>[
-                    //     FilteringTextInputFormatter.digitsOnly
-                    //   ],
-                    // ),
-
+                    //Separator
                     const SizedBox(height: 64),
 
                     // Add Part Number Button
-
                     CustomIconButton(
                       text: "Confirmar",
                       icon: Icons.check,

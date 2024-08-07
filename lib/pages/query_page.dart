@@ -32,6 +32,12 @@ class _QueryPageState extends State<QueryPage> {
     asyncInit();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    asyncInit();
+  }
+
   void asyncInit() async {
     await getPartNumbers();
   }
@@ -92,7 +98,10 @@ class _QueryPageState extends State<QueryPage> {
   }
 
   Future<void> getPartNumbers() async {
-    http.Response response = await FormController.getTable("inventory");
+    String conditions = "WHERE isActive = 1";
+
+    http.Response response =
+        await FormController.getTable("inventory", conditions);
     if (response.statusCode == 200) {
       setState(() {
         allParts = List<PartNumber>.from(jsonDecode(response.body)
@@ -100,6 +109,10 @@ class _QueryPageState extends State<QueryPage> {
         parts = allParts;
       });
     }
+  }
+
+  void print(value) {
+    debugPrint(value);
   }
 
   void updatePartNumber(String text) {
@@ -278,7 +291,7 @@ class _QueryPageState extends State<QueryPage> {
                             onTap: () {},
                             child: CustomCard(
                               partNumber: parts[index],
-                              ontap: getPartNumbers,
+                              getPartNumber: () => getPartNumbers,
                             ),
                           ),
                         ),
