@@ -26,6 +26,7 @@ class CustomBottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: height,
+      width: 600,
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -100,14 +101,6 @@ class CustomBottomSheet extends StatelessWidget {
                 ),
               ),
             ),
-            // child: CustomButton(
-            //     top: 0,
-            //     left: 0,
-            //     onTap: () {
-            //       applyFiltersAndUpdate();
-            //       Navigator.pop(context);
-            //     },
-            //     text: "Aplicar"),
           ],
         ),
       ),

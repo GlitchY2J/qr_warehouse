@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:qr_warehouse/pages/inventory_form.dart';
+import 'package:qr_warehouse/pages/create_part_number_page.dart';
 
 class AddPartNumberTile extends StatelessWidget {
   const AddPartNumberTile({
@@ -19,7 +19,7 @@ class AddPartNumberTile extends StatelessWidget {
         Navigator.pop(context),
         Navigator.of(context)
             .push(CupertinoPageRoute(
-          builder: (context) => const InventoryFormPage(),
+          builder: (context) => const CreatePartNumberPage(),
         ))
             .then((value) {
           getMovements();

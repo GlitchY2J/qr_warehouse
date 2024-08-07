@@ -83,11 +83,16 @@ class _DetailsPageState extends State<DetailsPage> {
     final double mobilePadding = screenWidth * 0.06;
 
     return Scaffold(
+      // background Color
       backgroundColor: const Color(0xFF17153B),
+      // App bar
       appBar: AppBar(
         backgroundColor: const Color(0xFF17153B),
       ),
+
+      // body
       body: SingleChildScrollView(
+        // padding
         child: Padding(
           padding: EdgeInsets.symmetric(
             vertical: 14,
@@ -97,42 +102,68 @@ class _DetailsPageState extends State<DetailsPage> {
             width: double.infinity,
             child: Column(
               children: [
-                // Part Number
-                Container(
-                  alignment: Alignment.topLeft,
-                  child:
-                      AppText(text: partNumber, color: Colors.white, size: 38),
-                ),
-                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Part Number
+                        Container(
+                          alignment: Alignment.topLeft,
+                          child: AppText(
+                              text: partNumber, color: Colors.white, size: 38),
+                        ),
+                        const SizedBox(height: 16),
 
-                // Description
-                Container(
-                  alignment: Alignment.topLeft,
-                  child: AppText(
-                      text: description, color: Colors.white60, size: 18),
-                ),
-                const SizedBox(height: 16),
+                        // Description
+                        Container(
+                          alignment: Alignment.topLeft,
+                          child: AppText(
+                              text: description,
+                              color: Colors.white60,
+                              size: 18),
+                        ),
+                        const SizedBox(height: 16),
 
-                // Location
-                Container(
-                  alignment: Alignment.topLeft,
-                  child: AppText(
-                    text: 'Locación: $location',
-                    color: Colors.white60,
-                    size: 18,
-                  ),
-                ),
-                const SizedBox(height: 16),
+                        // Location
+                        Container(
+                          alignment: Alignment.topLeft,
+                          child: AppText(
+                            text: 'Locación: $location',
+                            color: Colors.white60,
+                            size: 18,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
 
-                // Quantitty
-                Container(
-                  alignment: Alignment.topLeft,
-                  child: AppText(
-                    text: 'Cantidad en Inventario: $quantity',
-                    color: Colors.white60,
-                    size: 18,
-                  ),
+                        // Quantitty
+                        Container(
+                          alignment: Alignment.topLeft,
+                          child: AppText(
+                            text: 'Cantidad en Inventario: $quantity',
+                            color: Colors.white60,
+                            size: 18,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Image.asset(
+                          'assets/images/placeholder.jpg',
+                          width: 200,
+                          height: 200,
+                          fit: BoxFit.cover,
+                        )
+                      ],
+                    ),
+                  ],
                 ),
+
                 const SizedBox(height: 64),
 
                 // Button to add parts to order

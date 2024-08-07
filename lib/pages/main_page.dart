@@ -328,8 +328,8 @@ class _MainPageState extends State<MainPage> {
         children: [
           // Dropwdown Button Filters
           CustomDropDownButton(
-            top: 0,
-            left: 65,
+            top: 50,
+            left: 60,
             menuFilters: menuFilters,
             height: screenHeight,
             filters: filters,
@@ -345,7 +345,7 @@ class _MainPageState extends State<MainPage> {
           ),
 
           CustomPositionedButton(
-            top: 50,
+            top: 100,
             left: 40,
             width: screenWidth < 800 ? 250 : 300,
             text: "Reiniciar Filtros",
@@ -355,7 +355,7 @@ class _MainPageState extends State<MainPage> {
           ),
 
           CustomPositionedButton(
-            top: 50,
+            top: 100,
             left: screenWidth < 800 ? 300 : 350,
             width: screenWidth < 800 ? 250 : 300,
             text: "Rangos de Fecha",
