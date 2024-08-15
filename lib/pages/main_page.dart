@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:qr_warehouse/models/movement.dart';
 import 'package:qr_warehouse/models/user.dart';
 import 'package:qr_warehouse/pages/login_page.dart';
+import 'package:qr_warehouse/pages/movement_report.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
 import 'package:http/http.dart' as http;
 import 'package:qr_warehouse/widgets/custom_positioned_button.dart';
@@ -143,6 +144,18 @@ class _MainPageState extends State<MainPage> {
       filters['type'] = [];
       startDate = DateTime(2023, 1, 1);
       endDate = DateTime.now();
+    });
+  }
+
+  void goToMovementReport() {
+    Navigator.of(context)
+        .push(CupertinoPageRoute(
+      builder: (context) => MovementReport(
+        movementsList: filteredMovements,
+      ),
+    ))
+        .then((value) {
+      getMovements();
     });
   }
 
@@ -397,8 +410,11 @@ class _MainPageState extends State<MainPage> {
 
       /// Go to table view
       floatingActionButton: CustomFloatingActionButton(
-        selectedMovementList: filteredMovements,
-        getMovements: getMovements,
+        onPressed: () => goToMovementReport(),
+        icon: const Icon(
+          Icons.table_chart,
+          color: Color(0xFF17153B),
+        ),
       ),
     );
   }

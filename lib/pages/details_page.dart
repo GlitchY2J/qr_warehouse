@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:qr_warehouse/models/part_number.dart';
 import 'package:qr_warehouse/pages/edit_page.dart';
 import 'package:qr_warehouse/pages/movement_page.dart';
+import 'package:qr_warehouse/pages/qr_code_page.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
 import 'package:qr_warehouse/widgets/app_text.dart';
+import 'package:qr_warehouse/widgets/custom_floating_action_button.dart';
 import 'package:qr_warehouse/widgets/custom_icon_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -85,6 +87,16 @@ class _DetailsPageState extends State<DetailsPage> {
     } else {}
   }
 
+  void goToQRCodePage() {
+    Navigator.of(context).push(
+      CupertinoPageRoute(
+        builder: (context) => QRCodePage(
+          code: partNumber,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -98,6 +110,13 @@ class _DetailsPageState extends State<DetailsPage> {
       // App bar
       appBar: AppBar(
         backgroundColor: const Color(0xFF17153B),
+      ),
+      floatingActionButton: CustomFloatingActionButton(
+        onPressed: () => goToQRCodePage(),
+        icon: const Icon(
+          Icons.qr_code,
+          color: Color(0xFF17153B),
+        ),
       ),
 
       // body
