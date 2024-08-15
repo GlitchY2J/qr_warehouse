@@ -70,10 +70,6 @@ class _CreatePartNumberPageState extends State<CreatePartNumberPage> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final double desktopPadding = screenWidth * 0.25;
-    final double mobilePadding = screenWidth * 0.10;
-
     return Scaffold(
       backgroundColor: const Color(0xFF17153B),
       resizeToAvoidBottomInset: false,

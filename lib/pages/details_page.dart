@@ -6,6 +6,7 @@ import 'package:qr_warehouse/pages/movement_page.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
 import 'package:qr_warehouse/widgets/app_text.dart';
 import 'package:qr_warehouse/widgets/custom_icon_button.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DetailsPage extends StatefulWidget {
   final PartNumber partNumber;
@@ -20,6 +21,7 @@ class DetailsPage extends StatefulWidget {
 }
 
 class _DetailsPageState extends State<DetailsPage> {
+  String userType = '';
   late PartNumber myPartNumber;
   late String partNumber;
   late String description;
@@ -28,9 +30,17 @@ class _DetailsPageState extends State<DetailsPage> {
 
   @override
   void initState() {
+    getSharedPrefs();
     myPartNumber = widget.partNumber;
     setDetailsValues();
     super.initState();
+  }
+
+  dynamic getSharedPrefs() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userType = prefs.getString("userType")!;
+    });
   }
 
   setDetailsValues() {
@@ -188,39 +198,46 @@ class _DetailsPageState extends State<DetailsPage> {
                 ),
                 const SizedBox(height: 20),
 
-                // Button to edit part number
-                CustomIconButton(
-                  text: "Editar Número de Parte",
-                  icon: Icons.edit,
-                  height: 50,
-                  width: screenWidth,
-                  onPressed: () => Navigator.push(
-                    context,
-                    CupertinoPageRoute(
-                      builder: (context) => EditPage(
-                        partNumber: widget.partNumber,
-                      ),
-                    ),
-                  ).then((value) {
-                    if (value != null) {
-                      setState(() {
-                        myPartNumber = value;
-                      });
-                    }
-                    setDetailsValues();
-                  }),
-                ),
-                const SizedBox(height: 20),
+                userType == "Admin"
+                    ?
 
-                // Button to delete part number (disable it)
-                CustomIconButton(
-                  text: "Eliminar Número de Parte",
-                  icon: Icons.delete,
-                  height: 50,
-                  width: screenWidth,
-                  backgroundColor: const Color(0xFFFA7070),
-                  onPressed: () => disablePartNumber(partNumber),
-                ),
+                    // Button to delete part number (disable it)
+                    Column(
+                        children: [
+                          // Button to edit part number
+                          CustomIconButton(
+                            text: "Editar Número de Parte",
+                            icon: Icons.edit,
+                            height: 50,
+                            width: screenWidth,
+                            onPressed: () => Navigator.push(
+                              context,
+                              CupertinoPageRoute(
+                                builder: (context) => EditPage(
+                                  partNumber: widget.partNumber,
+                                ),
+                              ),
+                            ).then((value) {
+                              if (value != null) {
+                                setState(() {
+                                  myPartNumber = value;
+                                });
+                              }
+                              setDetailsValues();
+                            }),
+                          ),
+                          const SizedBox(height: 20),
+                          CustomIconButton(
+                            text: "Eliminar Número de Parte",
+                            icon: Icons.delete,
+                            height: 50,
+                            width: screenWidth,
+                            backgroundColor: const Color(0xFFFA7070),
+                            onPressed: () => disablePartNumber(partNumber),
+                          ),
+                        ],
+                      )
+                    : Container(),
               ],
             ),
           ),

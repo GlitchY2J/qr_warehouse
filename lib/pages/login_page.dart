@@ -106,7 +106,7 @@ class LoginPage extends StatelessWidget {
                       hintText: "Usuario",
                       obscureText: false,
                       keyboardType: TextInputType.text,
-                      onSubmitted: (value) {
+                      onSubmitted: (_) {
                         loginRequestToDatabase(context);
                       },
                     ),
@@ -121,7 +121,7 @@ class LoginPage extends StatelessWidget {
                       hintText: "Contraseña",
                       obscureText: true,
                       keyboardType: TextInputType.text,
-                      onSubmitted: (value) {
+                      onSubmitted: (_) {
                         loginRequestToDatabase(context);
                       },
                     ),

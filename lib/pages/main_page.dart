@@ -231,6 +231,10 @@ class _MainPageState extends State<MainPage> {
     if (args.value is PickerDateRange) {
       startDate = args.value.startDate;
       endDate = args.value.endDate ?? args.value.startDate;
+
+      // End date needs to be at 23:59:59
+      endDate =
+          DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59, 0, 0);
     }
   }
 
@@ -258,9 +262,13 @@ class _MainPageState extends State<MainPage> {
                 backgroundColor: const Color(0xFF17153B),
                 onSelectionChanged: onSelectionChanged,
                 selectionMode: DateRangePickerSelectionMode.range,
-                initialSelectedRange: PickerDateRange(
-                    DateTime.now().subtract(const Duration(days: 4)),
-                    DateTime.now().add(const Duration(days: 3))),
+                initialSelectedRange: startDate == DateTime(2023, 1, 1)
+                    ? PickerDateRange(DateTime.now(), DateTime.now())
+                    : PickerDateRange(startDate, endDate),
+                // initialSelectedRange: PickerDateRange(
+                //   DateTime.now(),
+                //   DateTime.now(),
+                // ),
               ),
             ),
           ),
