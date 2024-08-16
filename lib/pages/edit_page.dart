@@ -22,6 +22,7 @@ class EditPage extends StatefulWidget {
 class _EditPageState extends State<EditPage> {
   late TextEditingController partNumberController;
   late TextEditingController descriptionController;
+  late TextEditingController measureController;
   late TextEditingController quantityController;
   late TextEditingController minController;
   late TextEditingController maxController;
@@ -34,6 +35,7 @@ class _EditPageState extends State<EditPage> {
         TextEditingController(text: widget.partNumber.partNumber);
     descriptionController =
         TextEditingController(text: widget.partNumber.description);
+    measureController = TextEditingController(text: widget.partNumber.measure);
     quantityController =
         TextEditingController(text: widget.partNumber.quantity);
     minController = TextEditingController(text: widget.partNumber.min);
@@ -49,6 +51,7 @@ class _EditPageState extends State<EditPage> {
   void disposeTextControllers() {
     partNumberController.dispose();
     descriptionController.dispose();
+    measureController.dispose();
     quantityController.dispose();
     minController.dispose();
     maxController.dispose();
@@ -83,6 +86,7 @@ class _EditPageState extends State<EditPage> {
   PartNumber createNewPartNumber(
     String partNumber,
     String description,
+    String measure,
     String quantity,
     String min,
     String max,
@@ -94,6 +98,7 @@ class _EditPageState extends State<EditPage> {
     PartNumber newPart = PartNumber(
       partNumber: partNumber,
       description: description,
+      measure: measure,
       quantity: quantity,
       min: min,
       max: max,
@@ -110,6 +115,7 @@ class _EditPageState extends State<EditPage> {
     // get values from the controllers
     String partNumber = partNumberController.text;
     String description = descriptionController.text;
+    String measure = measureController.text;
     String quantity = quantityController.text;
     String min = minController.text;
     String max = maxController.text;
@@ -133,8 +139,17 @@ class _EditPageState extends State<EditPage> {
     if (result["success"] == "true") {
       message = "Actualización exitosa.";
       // Create a new Part Number to store all edited data
-      PartNumber myPartNumber = createNewPartNumber(partNumber, description,
-          quantity, min, max, location, manufacter, mnfPartNumber, '1');
+      PartNumber myPartNumber = createNewPartNumber(
+          partNumber,
+          description,
+          measure,
+          quantity,
+          min,
+          max,
+          location,
+          manufacter,
+          mnfPartNumber,
+          '1');
       // Return to previous page and get the new part number created with you
       returnToPreviousPage(myPartNumber);
     } else {
@@ -188,18 +203,13 @@ class _EditPageState extends State<EditPage> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Quantity
-                      // CustomTextField(
-                      //   width: 600,
-                      //   labelText: "Cantidad",
-                      //   controller: quantityController,
-                      //   enabled: false,
-                      //   keyboardType: TextInputType.number,
-                      //   inputFormatters: <TextInputFormatter>[
-                      //     FilteringTextInputFormatter.digitsOnly
-                      //   ],
-                      // ),
-                      // const SizedBox(height: 16),
+                      // Description
+                      CustomTextField(
+                        width: 600,
+                        labelText: "Unidad de Medida",
+                        controller: measureController,
+                      ),
+                      const SizedBox(height: 16),
 
                       // Minimum inventory quantity
                       CustomTextField(

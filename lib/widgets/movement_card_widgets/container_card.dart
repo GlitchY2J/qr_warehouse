@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:qr_warehouse/models/movement.dart';
 
 class ContainerCard extends StatelessWidget {
   const ContainerCard({
@@ -7,7 +8,7 @@ class ContainerCard extends StatelessWidget {
     required this.index,
   });
 
-  final List<dynamic> movements;
+  final List<Movement> movements;
   final int index;
 
   @override

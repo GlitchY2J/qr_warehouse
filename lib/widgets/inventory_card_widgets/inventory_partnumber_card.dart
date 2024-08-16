@@ -1,26 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:qr_warehouse/models/movement.dart';
+import 'package:qr_warehouse/models/part_number.dart';
 
-class PartNumberCard extends StatelessWidget {
-  const PartNumberCard({
+class InventoryPartNumberCard extends StatelessWidget {
+  const InventoryPartNumberCard({
     super.key,
-    required this.movements,
+    required this.parts,
     required this.index,
   });
 
-  final List<Movement> movements;
+  final List<PartNumber> parts;
   final int index;
 
   @override
   Widget build(BuildContext context) {
     debugPrint("building part number card");
     return Positioned(
-      top: 12,
-      left: 45,
+      top: 20,
+      left: 50,
       child: Text(
-        movements[index].partNumber,
+        parts[index].partNumber,
         style: const TextStyle(
-          fontSize: 28,
+          fontSize: 23,
           fontWeight: FontWeight.bold,
           color: Colors.white,
         ),

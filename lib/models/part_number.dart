@@ -1,6 +1,7 @@
 class PartNumber {
   final String partNumber;
   final String description;
+  final String measure;
   final String quantity;
   final String min;
   final String max;
@@ -12,6 +13,7 @@ class PartNumber {
   const PartNumber({
     required this.partNumber,
     required this.description,
+    required this.measure,
     required this.quantity,
     required this.min,
     required this.max,
@@ -25,6 +27,7 @@ class PartNumber {
     return PartNumber(
       partNumber: json['partnumber'],
       description: json['description'],
+      measure: json['measure_unit'],
       quantity: json['quantity'],
       min: json['min'],
       max: json['max'],
@@ -39,6 +42,7 @@ class PartNumber {
     return {
       'partnumber': partNumber,
       'description': description,
+      'measure_unit': measure,
       'quantity': quantity,
       'min': min,
       'max': max,
@@ -53,6 +57,7 @@ class PartNumber {
     return [
       partNumber,
       description,
+      measure,
       quantity.toString(),
       min.toString(),
       max.toString(),

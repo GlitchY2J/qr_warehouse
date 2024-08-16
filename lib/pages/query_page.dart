@@ -1,14 +1,15 @@
 import 'dart:convert';
 import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:qr_warehouse/models/part_number.dart';
 import 'package:qr_warehouse/pages/bulk_results.dart';
 import 'package:qr_warehouse/pages/qr_scan_page.dart';
 import 'package:qr_warehouse/utils/encrypt_data.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
 import 'package:http/http.dart' as http;
-import 'package:qr_warehouse/widgets/custom_card.dart';
 import 'package:qr_warehouse/widgets/custom_icon_button.dart';
+import 'package:qr_warehouse/widgets/parts_gridview.dart';
 
 class QueryPage extends StatefulWidget {
   const QueryPage({super.key});
@@ -18,27 +19,35 @@ class QueryPage extends StatefulWidget {
 }
 
 class _QueryPageState extends State<QueryPage> {
+  // variable to check if data is loading from database
+  bool isLoading = true;
+
+  // variable to store the partnumber being scanned
   String? scannedData;
-  bool showDataTable = false;
+
+  // Lists to store parts and filtered parts
   List<PartNumber> allParts = [];
   List<PartNumber> parts = [];
-  //PartNumber partModel = PartNumber(partNumber: '', description: '');
+
+  // filters
   String filterPartNumber = '';
   String filterDescription = '';
 
-  @override
-  void initState() {
-    super.initState();
-    asyncInit();
-  }
+  // text controllers
+  final partNumberController = TextEditingController();
+  final descriptionController = TextEditingController();
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    asyncInit();
+  void initState() {
+    debugPrint("init state");
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      asyncInit();
+    });
   }
 
   void asyncInit() async {
+    debugPrint("async init");
     await getPartNumbers();
   }
 
@@ -65,11 +74,7 @@ class _QueryPageState extends State<QueryPage> {
     }
   }
 
-  formatCSVToList(String url) async {
-    String decryptedUrl = decryptUrl(url);
-    //String decryptedUrl = decryptUrl(url);
-    List<List<dynamic>> partsList = await fetchTextData(decryptedUrl);
-
+  void goToBulkResults(List<List<dynamic>> partsList) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -77,6 +82,14 @@ class _QueryPageState extends State<QueryPage> {
                 partsList: partsList,
               )),
     );
+  }
+
+  formatCSVToList(String url) async {
+    String decryptedUrl = decryptUrl(url);
+    //String decryptedUrl = decryptUrl(url);
+    List<List<dynamic>> partsList = await fetchTextData(decryptedUrl);
+
+    goToBulkResults(partsList);
   }
 
   void openScannerScreen(String paramater) async {
@@ -98,6 +111,16 @@ class _QueryPageState extends State<QueryPage> {
   }
 
   Future<void> getPartNumbers() async {
+    debugPrint("getting part numbers");
+
+    // clear textfields
+    updatePartNumber('');
+    updateDescription('');
+
+    // clear controllers
+    partNumberController.clear();
+    descriptionController.clear();
+
     String conditions = "WHERE isActive = 1";
 
     http.Response response =
@@ -107,6 +130,7 @@ class _QueryPageState extends State<QueryPage> {
         allParts = List<PartNumber>.from(jsonDecode(response.body)
             .map((model) => PartNumber.fromJson(model)));
         parts = allParts;
+        isLoading = false;
       });
     }
   }
@@ -143,6 +167,7 @@ class _QueryPageState extends State<QueryPage> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("building widget");
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
@@ -167,7 +192,7 @@ class _QueryPageState extends State<QueryPage> {
                 width: screenWidth < 800 ? screenWidth : screenWidth * 0.3,
                 margin:
                     const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
-                height: 61,
+                height: 50,
                 child: Row(
                   children: [
                     Expanded(
@@ -191,6 +216,7 @@ class _QueryPageState extends State<QueryPage> {
                                         TextStyle(color: Colors.grey[500]),
                                     border: InputBorder.none,
                                   ),
+                                  controller: partNumberController,
                                   onChanged: (String value) {
                                     updatePartNumber(value);
                                   },
@@ -243,6 +269,7 @@ class _QueryPageState extends State<QueryPage> {
                                         TextStyle(color: Colors.grey[500]),
                                     border: InputBorder.none,
                                   ),
+                                  controller: descriptionController,
                                   onChanged: (String value) {
                                     updateDescription(value);
                                   },
@@ -268,40 +295,14 @@ class _QueryPageState extends State<QueryPage> {
               ),
               const SizedBox(height: 48),
 
-              SizedBox(
-                height: screenHeight - 400,
-                width: screenWidth < 800 ? screenWidth : screenWidth * 0.5,
-                child: ListView.builder(
-                  scrollDirection: Axis.vertical,
-                  shrinkWrap: true,
-                  itemCount: parts.length < 20 ? parts.length : 20,
-                  itemBuilder: (context, index) {
-                    if (parts[index].isActive == '1') {
-                      return Material(
-                        type: MaterialType.transparency,
-                        elevation: 1.0,
-                        color: Colors.transparent,
-                        shadowColor: Colors.grey[50],
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 10,
-                            horizontal: 20,
-                          ),
-                          child: InkWell(
-                            onTap: () {},
-                            child: CustomCard(
-                              partNumber: parts[index],
-                              getPartNumber: () => getPartNumbers,
-                            ),
-                          ),
-                        ),
-                      );
-                    } else {
-                      return Container();
-                    }
-                  },
-                ),
-              ),
+              !isLoading
+                  ? PartsGridView(
+                      screenHeight: screenHeight,
+                      screenWidth: screenWidth,
+                      parts: parts,
+                      onReturned: getPartNumbers,
+                    )
+                  : Container(),
             ],
           ),
         ),

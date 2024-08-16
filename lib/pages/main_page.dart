@@ -68,6 +68,7 @@ class _MainPageState extends State<MainPage> {
 
   @override
   void initState() {
+    debugPrint("init state");
     startDate = DateTime(2023, 1, 1);
     endDate = DateTime.now();
     super.initState();
@@ -77,6 +78,7 @@ class _MainPageState extends State<MainPage> {
   }
 
   void asyncInit() async {
+    debugPrint("async init");
     await getMovements();
     filteredMovements = allMovements;
     updateUniqueValues();
@@ -217,6 +219,7 @@ class _MainPageState extends State<MainPage> {
 
   // function that get movements table from server
   Future<void> getMovements() async {
+    debugPrint("getting movements");
     http.Response response = await FormController.getMovements();
     if (response.statusCode == 200) {
       setState(() {
@@ -315,6 +318,7 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("building widget");
     // user related variables
     final String? userType = widget.user?.userType;
     final String? savedUserType = widget.prefs?.getString("userType");

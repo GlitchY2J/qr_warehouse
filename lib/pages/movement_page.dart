@@ -101,6 +101,7 @@ class _MovementPageState extends State<MovementPage> {
           PartNumber partNumber = PartNumber(
             partNumber: widget.partNumber.partNumber,
             description: widget.partNumber.description,
+            measure: widget.partNumber.measure,
             quantity: finalQuantity.toString(),
             min: widget.partNumber.min,
             max: widget.partNumber.max,
