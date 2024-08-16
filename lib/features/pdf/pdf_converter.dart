@@ -80,13 +80,15 @@ class PDFConverter {
       ),
     );
 
+    final timestamp = DateTime.now().microsecondsSinceEpoch;
+
     final directory = Platform.isWindows
         ? (await getDownloadsDirectory())!.path
         : Platform.isAndroid
             ? '/storage/emulated/0/Download'
             : (await getApplicationDocumentsDirectory()).path;
 
-    final file = File("$directory/report.pdf");
+    final file = File("$directory/report$timestamp.pdf");
     await file.writeAsBytes(await doc.save());
   }
 }

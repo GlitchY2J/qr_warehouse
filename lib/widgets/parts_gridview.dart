@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:qr_warehouse/models/part_number.dart';
 import 'package:qr_warehouse/pages/details_page.dart';
 import 'package:qr_warehouse/widgets/inventory_card_widgets/inventory_container_card.dart';
@@ -9,7 +12,7 @@ import 'package:qr_warehouse/widgets/inventory_card_widgets/inventory_measure_ca
 import 'package:qr_warehouse/widgets/inventory_card_widgets/inventory_partnumber_card.dart';
 import 'package:qr_warehouse/widgets/inventory_card_widgets/inventory_quantity_card.dart';
 
-class PartsGridView extends StatelessWidget {
+class PartsGridView extends StatefulWidget {
   const PartsGridView({
     super.key,
     required this.screenHeight,
@@ -24,104 +27,140 @@ class PartsGridView extends StatelessWidget {
   final VoidCallback onReturned;
 
   @override
+  State<PartsGridView> createState() => _PartsGridViewState();
+}
+
+class _PartsGridViewState extends State<PartsGridView> {
+  List<PartNumber> displayedParts = [];
+  int incrementItems = 20;
+  int displayedItems = 30;
+  final ScrollController scrollController = ScrollController();
+
+  void loadMoreItems() {
+    debugPrint('load more items');
+    setState(() {
+      displayedItems += incrementItems;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    //incrementItems = widget.parts.length;
+    //loadMoreItems();
+    scrollController.addListener(() {
+      if (scrollController.position.pixels ==
+          scrollController.position.maxScrollExtent) {
+        loadMoreItems();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     debugPrint("building gridview");
     return SizedBox(
-      height: screenHeight - 400,
-      width: screenWidth < 800 ? screenWidth : screenWidth * 0.4,
+      height: widget.screenHeight - 400,
+      width: widget.screenWidth < 800
+          ? widget.screenWidth
+          : widget.screenWidth * 0.4,
       child: GridView.builder(
+          controller: scrollController,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 1,
             childAspectRatio: 6,
             crossAxisSpacing: 20,
             mainAxisSpacing: 20,
           ),
-          itemCount: parts.length < 30 ? parts.length : 30,
+          itemCount: widget.parts.length < displayedItems
+              ? widget.parts.length
+              : displayedItems,
           shrinkWrap: true,
           physics: const ScrollPhysics(),
           itemBuilder: (context, index) {
+            String partnumber = widget.parts[index].partNumber;
             return GestureDetector(
+              onLongPress: () {
+                debugPrint('shows picture');
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return Dialog(
+                      child: SizedBox(
+                        width: 300,
+                        height: 300,
+                        child: Image.asset(
+                          'assets/images/parts/$partnumber.png',
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Image.asset(
+                              'assets/images/placeholder.jpg',
+                              fit: BoxFit.cover,
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
               onTap: () {
                 Navigator.of(context)
                     .push(
                   CupertinoPageRoute(
                     builder: (BuildContext context) => DetailsPage(
-                      partNumber: parts[index],
+                      partNumber: widget.parts[index],
                     ),
                   ),
                 )
                     .then((_) {
-                  onReturned();
+                  widget.onReturned();
                 });
               },
               child: Stack(
                 children: [
                   // CONTAINER CARD
                   InventoryContainerCard(
-                    parts: parts,
+                    parts: widget.parts,
                     index: index,
                   ),
 
                   // PART NUMBER
                   InventoryPartNumberCard(
-                    parts: parts,
+                    parts: widget.parts,
                     index: index,
                   ),
 
                   InventoryDescriptionCard(
-                    parts: parts,
+                    parts: widget.parts,
                     index: index,
                   ),
 
                   // Location
                   InventoryLocationCard(
-                    parts: parts,
+                    parts: widget.parts,
                     index: index,
                   ),
 
                   InventoryQuantityCard(
-                    parts: parts,
+                    parts: widget.parts,
                     index: index,
                   ),
 
                   InventoryMeasureCard(
-                    parts: parts,
+                    parts: widget.parts,
                     index: index,
                   )
                 ],
               ),
             );
           }),
-      // child: ListView.builder(
-      //   scrollDirection: Axis.vertical,
-      //   shrinkWrap: true,
-      //   itemCount: parts.length < 20 ? parts.length : 20,
-      //   itemBuilder: (context, index) {
-      //     if (parts[index].isActive == '1') {
-      //       return Material(
-      //         type: MaterialType.transparency,
-      //         elevation: 1.0,
-      //         color: Colors.transparent,
-      //         shadowColor: Colors.grey[50],
-      //         child: Container(
-      //           padding: const EdgeInsets.symmetric(
-      //             vertical: 10,
-      //             horizontal: 20,
-      //           ),
-      //           child: InkWell(
-      //             onTap: () {},
-      //             child: CustomCard(
-      //               partNumber: parts[index],
-      //               getPartNumber: () => getPartNumbers,
-      //             ),
-      //           ),
-      //         ),
-      //       );
-      //     } else {
-      //       return Container();
-      //     }
-      //   },
-      // ),
     );
   }
 }

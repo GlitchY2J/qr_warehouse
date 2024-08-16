@@ -183,11 +183,19 @@ class _DetailsPageState extends State<DetailsPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Image.asset(
-                          'assets/images/placeholder.jpg',
+                          'assets/images/parts/$partNumber.png',
                           width: 200,
                           height: 200,
                           fit: BoxFit.cover,
-                        )
+                          errorBuilder: (context, error, stackTrace) {
+                            return Image.asset(
+                              'assets/images/placeholder.jpg',
+                              width: 200,
+                              height: 200,
+                              fit: BoxFit.cover,
+                            );
+                          },
+                        ),
                       ],
                     ),
                   ],

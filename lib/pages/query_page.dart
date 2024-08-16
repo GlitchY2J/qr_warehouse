@@ -9,7 +9,9 @@ import 'package:qr_warehouse/utils/encrypt_data.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
 import 'package:http/http.dart' as http;
 import 'package:qr_warehouse/widgets/custom_icon_button.dart';
+import 'package:qr_warehouse/widgets/inventory_description_field.dart';
 import 'package:qr_warehouse/widgets/parts_gridview.dart';
+import 'package:qr_warehouse/widgets/textfield_with_button.dart';
 
 class QueryPage extends StatefulWidget {
   const QueryPage({super.key});
@@ -165,6 +167,12 @@ class _QueryPageState extends State<QueryPage> {
     );
   }
 
+  Future<void> refresh() {
+    getPartNumbers();
+
+    return Future.delayed(const Duration(seconds: 2));
+  }
+
   @override
   Widget build(BuildContext context) {
     debugPrint("building widget");
@@ -180,130 +188,50 @@ class _QueryPageState extends State<QueryPage> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF17153B),
       ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(
-          vertical: 14,
-          horizontal: screenWidth < 800 ? mobilePadding : desktopPadding,
-        ),
-        child: Center(
-          child: Column(
-            children: [
-              Container(
-                width: screenWidth < 800 ? screenWidth : screenWidth * 0.3,
-                margin:
-                    const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
-                height: 50,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF17153B),
-                          borderRadius: BorderRadius.circular(8.0),
-                          border: Border.all(
-                            color: Colors.white,
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  decoration: InputDecoration(
-                                    hintText: "Número de Parte",
-                                    hintStyle:
-                                        TextStyle(color: Colors.grey[500]),
-                                    border: InputBorder.none,
-                                  ),
-                                  controller: partNumberController,
-                                  onChanged: (String value) {
-                                    updatePartNumber(value);
-                                  },
-                                ),
-                              ),
-                              screenWidth < 800
-                                  ? IconButton(
-                                      icon: const Icon(
-                                        Icons.qr_code,
-                                        color: Colors.white,
-                                      ),
-                                      onPressed: () =>
-                                          openScannerScreen("query"),
-                                    )
-                                  : Container(),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+      body: RefreshIndicator(
+        onRefresh: refresh,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            vertical: 14,
+            horizontal: screenWidth < 800 ? mobilePadding : desktopPadding,
+          ),
+          child: Center(
+            child: Column(
+              children: [
+                TextFieldWithButton(
+                  screenWidth: screenWidth,
+                  partNumberController: partNumberController,
+                  updatePartNumber: updatePartNumber,
+                  openScannerScreen: openScannerScreen,
                 ),
-              ),
 
-              Container(
-                margin:
-                    const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
-                height: 61,
-                width: screenWidth < 800 ? screenWidth : screenWidth * 0.3,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF17153B),
-                          borderRadius: BorderRadius.circular(8.0),
-                          border: Border.all(
-                            color: Colors.white,
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  decoration: InputDecoration(
-                                    hintText: "Descripción",
-                                    hintStyle:
-                                        TextStyle(color: Colors.grey[500]),
-                                    border: InputBorder.none,
-                                  ),
-                                  controller: descriptionController,
-                                  onChanged: (String value) {
-                                    updateDescription(value);
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                InventoryDescriptionField(
+                  screenWidth: screenWidth,
+                  descriptionController: descriptionController,
+                  updateDescription: updateDescription,
                 ),
-              ),
-              const SizedBox(height: 48),
-              // Search Button
+                const SizedBox(height: 48),
+                // Search Button
 
-              CustomIconButton(
-                text: "Actualizar",
-                icon: Icons.refresh,
-                height: 50,
-                width: screenWidth < 800 ? screenWidth : screenWidth * 0.3,
-                onPressed: asyncInit,
-              ),
-              const SizedBox(height: 48),
+                CustomIconButton(
+                  text: "Actualizar",
+                  icon: Icons.refresh,
+                  height: 50,
+                  width: screenWidth < 800 ? screenWidth : screenWidth * 0.3,
+                  onPressed: asyncInit,
+                ),
+                const SizedBox(height: 48),
 
-              !isLoading
-                  ? PartsGridView(
-                      screenHeight: screenHeight,
-                      screenWidth: screenWidth,
-                      parts: parts,
-                      onReturned: getPartNumbers,
-                    )
-                  : Container(),
-            ],
+                !isLoading
+                    ? PartsGridView(
+                        screenHeight: screenHeight,
+                        screenWidth: screenWidth,
+                        parts: parts,
+                        onReturned: getPartNumbers,
+                      )
+                    : Container(),
+              ],
+            ),
           ),
         ),
       ),
