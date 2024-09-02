@@ -46,7 +46,11 @@ class _MovementPageState extends State<MovementPage> {
 
   updateInventoryAndRecords(type) async {
     // create a reference for passed variables
-    int initialQuantity = int.parse(widget.partNumber.quantity);
+    // int initialQuantity = int.parse(widget.partNumber.quantity);
+    num initialQuantity =
+        widget.partNumber.measure == 'FT' || widget.partNumber.measure == 'YD'
+            ? double.parse(widget.partNumber.quantity)
+            : int.parse(widget.partNumber.quantity);
 
     String action = widget.action;
 
@@ -63,12 +67,12 @@ class _MovementPageState extends State<MovementPage> {
     /// UPDATE
 
     /// Calculating updated quantity
-    int finalQuantity;
+    num finalQuantity;
     if (action == "substract") {
-      finalQuantity = initialQuantity - int.parse(quantityController.text);
+      finalQuantity = initialQuantity - num.parse(quantityController.text);
       type = "Salida";
     } else {
-      finalQuantity = initialQuantity + int.parse(quantityController.text);
+      finalQuantity = initialQuantity + num.parse(quantityController.text);
       type = "Entrada";
     }
 
@@ -88,7 +92,7 @@ class _MovementPageState extends State<MovementPage> {
     /// If uptading inventory correctly then
     if (result["success"] == "true") {
       values =
-          "'DEFAULT', '${widget.partNumber.partNumber}', '$type', ${int.parse(quantityController.text)}, '$user', '$formattedDateTime', '${orderController.text}', null, null";
+          "'DEFAULT', '${widget.partNumber.partNumber}', '$type', ${double.parse(quantityController.text)}, '$user', '$formattedDateTime', '${orderController.text}', null, null";
 
       // Insert record into Movements table
       result = await FormController.insertRecords("movements", values);
@@ -205,7 +209,7 @@ class _MovementPageState extends State<MovementPage> {
                       validator: (value) {
                         if (value == null ||
                             value.isEmpty ||
-                            int.parse(value) < 1) {
+                            num.parse(value) <= 0) {
                           return 'Ingresa una cantidad válida';
                         }
                         return null;

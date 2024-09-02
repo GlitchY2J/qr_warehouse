@@ -22,7 +22,8 @@ class CustomIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 15.0),
       width: width,
       height: height,
       child: ElevatedButton.icon(

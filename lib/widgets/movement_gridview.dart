@@ -23,7 +23,6 @@ class MovementGridView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint("building movements grid view");
     return Positioned(
       top: screenHeight * 0.28,
       left: screenWidth * 0.03,

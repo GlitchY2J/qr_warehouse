@@ -128,7 +128,7 @@ class _EditPageState extends State<EditPage> {
 
     // create values and condition strings
     String values =
-        "description = '$description', min = $min, max = $max, location = '$location', manufacter = '$manufacter', mnfpartnumber = '$mnfPartNumber'";
+        "description = '$description', measure_unit = '$measure', min = $min, max = $max, location = '$location', manufacter = '$manufacter', mnfpartnumber = '$mnfPartNumber'";
     String condition = "partnumber = '$partNumber'";
 
     // Updating Record

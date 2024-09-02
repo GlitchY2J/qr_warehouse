@@ -13,7 +13,6 @@ class PartNumberCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint("building part number card");
     return Positioned(
       top: 12,
       left: 45,

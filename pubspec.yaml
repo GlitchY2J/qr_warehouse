@@ -30,6 +30,7 @@ dependencies:
   provider: ^6.0.0
   dropdown_button2: ^2.2.0
   syncfusion_flutter_datepicker: ^26.2.7
+  excel: ^4.0.6
 
   # Icons
   iconsax: ^0.0.8
@@ -38,7 +39,8 @@ dependencies:
 
     # State Management
   get: ^4.6.5
-  syncfusion_flutter_sliders: 26.2.7
+  file_picker: ^8.1.2
+  window_manager: ^0.4.2
 
 # ----------------------------- PACKAGES END ------------------------------------#
 dev_dependencies:

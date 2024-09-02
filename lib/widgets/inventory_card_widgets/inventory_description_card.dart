@@ -14,7 +14,7 @@ class InventoryDescriptionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      bottom: 20,
+      top: 50,
       left: 50,
       child: SizedBox(
         width: 330,

@@ -12,4 +12,12 @@ class Formatters {
     String formatedDate = DateFormat("MM-dd-yyyy HH:mm").format(date);
     return formatedDate;
   }
+
+  static String integerOrDouble(String value) {
+    if (num.parse(value) % 1 == 0) {
+      return int.parse(value).toString();
+    } else {
+      return double.parse(value).toStringAsFixed(1);
+    }
+  }
 }

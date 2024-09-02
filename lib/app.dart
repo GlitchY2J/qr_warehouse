@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:qr_warehouse/pages/login_page.dart';
 import 'package:qr_warehouse/pages/main_page.dart';
-import 'package:qr_warehouse/test/test2.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class App extends StatelessWidget {

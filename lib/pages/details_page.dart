@@ -28,7 +28,7 @@ class _DetailsPageState extends State<DetailsPage> {
   late String partNumber;
   late String description;
   late String location;
-  late int quantity;
+  late String quantity;
 
   @override
   void initState() {
@@ -45,11 +45,20 @@ class _DetailsPageState extends State<DetailsPage> {
     });
   }
 
+  String integerOrDouble(String value) {
+    if (num.parse(value) % 1 == 0) {
+      return int.parse(value).toString();
+    } else {
+      return double.parse(value).toStringAsFixed(1);
+    }
+  }
+
   setDetailsValues() {
     partNumber = myPartNumber.partNumber;
     description = myPartNumber.description;
     location = myPartNumber.location;
-    quantity = int.parse(myPartNumber.quantity);
+
+    quantity = integerOrDouble(myPartNumber.quantity);
   }
 
   _goToMovementPage(BuildContext context, String action, String title) async {
@@ -182,8 +191,8 @@ class _DetailsPageState extends State<DetailsPage> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Image.asset(
-                          'assets/images/parts/$partNumber.png',
+                        Image.network(
+                          'http://10.30.0.42/Dashboard/qr_warehouse/images/$partNumber.png',
                           width: 200,
                           height: 200,
                           fit: BoxFit.cover,

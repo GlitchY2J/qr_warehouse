@@ -31,7 +31,7 @@ class PartNumber {
       quantity: json['quantity'],
       min: json['min'],
       max: json['max'],
-      location: json['location'],
+      location: json['location'] ?? json['location'],
       manufacter: json['manufacter'],
       mnfPartNumber: json['mnfpartnumber'],
       isActive: json['isActive'],

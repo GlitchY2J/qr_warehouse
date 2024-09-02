@@ -150,12 +150,16 @@ class CustomButton extends StatelessWidget {
     this.width,
     required this.text,
     required this.onTap,
+    this.color = const Color(0xFF433D8B),
+    this.textColor = Colors.white,
   });
 
   final EdgeInsets padding;
   final double? width;
   final String text;
   final Function() onTap;
+  final Color? color;
+  final Color? textColor;
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +175,7 @@ class CustomButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
           child: Material(
-            color: const Color(0xFF433D8B),
+            color: color,
             borderRadius: BorderRadius.circular(8),
             child: InkWell(
               borderRadius: BorderRadius.circular(8),
@@ -181,8 +185,8 @@ class CustomButton extends StatelessWidget {
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
                     text,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: textColor,
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),

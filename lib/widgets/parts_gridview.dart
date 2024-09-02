@@ -2,9 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:qr_warehouse/models/part_number.dart';
 import 'package:qr_warehouse/pages/details_page.dart';
+import 'package:qr_warehouse/widgets/inventory_card_widgets/inventory_color_indicator.dart';
 import 'package:qr_warehouse/widgets/inventory_card_widgets/inventory_container_card.dart';
 import 'package:qr_warehouse/widgets/inventory_card_widgets/inventory_description_card.dart';
 import 'package:qr_warehouse/widgets/inventory_card_widgets/inventory_location_card.dart';
@@ -37,7 +37,6 @@ class _PartsGridViewState extends State<PartsGridView> {
   final ScrollController scrollController = ScrollController();
 
   void loadMoreItems() {
-    debugPrint('load more items');
     setState(() {
       displayedItems += incrementItems;
     });
@@ -46,8 +45,7 @@ class _PartsGridViewState extends State<PartsGridView> {
   @override
   void initState() {
     super.initState();
-    //incrementItems = widget.parts.length;
-    //loadMoreItems();
+
     scrollController.addListener(() {
       if (scrollController.position.pixels ==
           scrollController.position.maxScrollExtent) {
@@ -64,7 +62,6 @@ class _PartsGridViewState extends State<PartsGridView> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint("building gridview");
     return SizedBox(
       height: widget.screenHeight - 400,
       width: widget.screenWidth < 800
@@ -87,7 +84,6 @@ class _PartsGridViewState extends State<PartsGridView> {
             String partnumber = widget.parts[index].partNumber;
             return GestureDetector(
               onLongPress: () {
-                debugPrint('shows picture');
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
@@ -95,8 +91,8 @@ class _PartsGridViewState extends State<PartsGridView> {
                       child: SizedBox(
                         width: 300,
                         height: 300,
-                        child: Image.asset(
-                          'assets/images/parts/$partnumber.png',
+                        child: Image.network(
+                          'http://10.30.0.42/Dashboard/qr_warehouse/images/$partnumber.png',
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
                             return Image.asset(
@@ -105,6 +101,18 @@ class _PartsGridViewState extends State<PartsGridView> {
                             );
                           },
                         ),
+
+                        // child: Image.asset(
+                        //   'assets/images/parts/$partnumber.jpg',
+                        //   fit: BoxFit.cover,
+                        //   errorBuilder: (context, error, stackTrace) {
+                        //     return Image.asset(
+                        //       'assets/images/placeholder.jpg',
+                        //       fit: BoxFit.cover,
+                        //     );
+
+                        //   },
+                        // ),
                       ),
                     );
                   },
@@ -126,10 +134,7 @@ class _PartsGridViewState extends State<PartsGridView> {
               child: Stack(
                 children: [
                   // CONTAINER CARD
-                  InventoryContainerCard(
-                    parts: widget.parts,
-                    index: index,
-                  ),
+                  const InventoryContainerCard(),
 
                   // PART NUMBER
                   InventoryPartNumberCard(
@@ -154,6 +159,11 @@ class _PartsGridViewState extends State<PartsGridView> {
                   ),
 
                   InventoryMeasureCard(
+                    parts: widget.parts,
+                    index: index,
+                  ),
+
+                  InventoryColorIndicator(
                     parts: widget.parts,
                     index: index,
                   )
