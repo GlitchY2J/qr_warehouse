@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+//import 'package:flutter/foundation.dart';
 
 class DatabaseHelper {
+  // choose between testing or production database
   static const String _baseUrl = 'http://10.30.0.42/Dashboard/qr_warehouse';
 
   /// GET METHOD

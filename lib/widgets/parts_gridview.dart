@@ -101,18 +101,6 @@ class _PartsGridViewState extends State<PartsGridView> {
                             );
                           },
                         ),
-
-                        // child: Image.asset(
-                        //   'assets/images/parts/$partnumber.jpg',
-                        //   fit: BoxFit.cover,
-                        //   errorBuilder: (context, error, stackTrace) {
-                        //     return Image.asset(
-                        //       'assets/images/placeholder.jpg',
-                        //       fit: BoxFit.cover,
-                        //     );
-
-                        //   },
-                        // ),
                       ),
                     );
                   },
@@ -154,11 +142,6 @@ class _PartsGridViewState extends State<PartsGridView> {
                   ),
 
                   InventoryQuantityCard(
-                    parts: widget.parts,
-                    index: index,
-                  ),
-
-                  InventoryMeasureCard(
                     parts: widget.parts,
                     index: index,
                   ),

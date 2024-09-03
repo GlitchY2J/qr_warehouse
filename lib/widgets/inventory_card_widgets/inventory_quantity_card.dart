@@ -15,10 +15,10 @@ class InventoryQuantityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      bottom: 20,
-      right: 100,
+      bottom: 15,
+      right: 50,
       child: Text(
-        Formatters.integerOrDouble(parts[index].quantity),
+        '${Formatters.integerOrDouble(parts[index].quantity)} ${parts[index].measure}',
         style: const TextStyle(
           fontSize: 15,
           color: Colors.white70,

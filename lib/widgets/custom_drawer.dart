@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:qr_warehouse/pages/main_page.dart';
 import 'package:qr_warehouse/widgets/add_new_user_tile.dart';
 import 'package:qr_warehouse/widgets/add_part_number_tile..dart';
+import 'package:qr_warehouse/widgets/astro_logo.dart';
 import 'package:qr_warehouse/widgets/astrophysics_logo.dart';
 import 'package:qr_warehouse/pages/new_user_page.dart';
 import 'package:qr_warehouse/widgets/inventory_tile.dart';
@@ -32,8 +33,21 @@ class CustomDrawer extends StatelessWidget {
             children: [
               const Positioned(
                 top: 40,
-                left: 30,
-                child: AstrophysicsLogo(color: Colors.white, width: 250),
+                left: 40,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    AstroLogo(width: 40),
+                    SizedBox(width: 10),
+                    Text(
+                      'QR WAREHOUSE',
+                      style: TextStyle(
+                          fontFamily: 'Staatliches',
+                          fontSize: 35,
+                          color: Color(0xFFB174E7)),
+                    ),
+                  ],
+                ),
               ),
               Positioned(
                 top: 100,

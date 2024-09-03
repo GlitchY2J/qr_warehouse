@@ -14,7 +14,7 @@ class InventoryPartNumberCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      top: 20,
+      top: 10,
       left: 50,
       child: Text(
         parts[index].partNumber,

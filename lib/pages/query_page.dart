@@ -132,7 +132,7 @@ class _QueryPageState extends State<QueryPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ConstrainedBox(
-                        constraints: BoxConstraints(maxWidth: 400),
+                        constraints: const BoxConstraints(maxWidth: 400),
                         child: CustomButton(
                           text: "Cancelar",
                           color: Colors.white,
@@ -142,7 +142,7 @@ class _QueryPageState extends State<QueryPage> {
                         ),
                       ),
                       ConstrainedBox(
-                        constraints: BoxConstraints(maxWidth: 400),
+                        constraints: const BoxConstraints(maxWidth: 400),
                         child: CustomButton(
                           text: "Confirmar",
                           padding: const EdgeInsets.symmetric(horizontal: 30),
