@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 class TextFieldWithButton extends StatelessWidget {
@@ -48,7 +50,7 @@ class TextFieldWithButton extends StatelessWidget {
                         },
                       ),
                     ),
-                    screenWidth < 800
+                    Platform.isAndroid
                         ? IconButton(
                             icon: const Icon(
                               Icons.qr_code,

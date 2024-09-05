@@ -32,7 +32,7 @@ class _QRCodePageState extends State<QRCodePage> {
             : (await getApplicationDocumentsDirectory()).path;
     ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     Uint8List pngBytes = byteData!.buffer.asUint8List();
-    File imgFile = File("$directory/qrCode.png");
+    File imgFile = File("$directory/${widget.code}.png");
 
     await imgFile.writeAsBytes(pngBytes);
 

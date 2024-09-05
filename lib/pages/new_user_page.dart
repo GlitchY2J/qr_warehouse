@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:qr_warehouse/models/user.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
 import 'package:qr_warehouse/widgets/custom_form_text_field.dart';
@@ -208,9 +209,9 @@ class _NewUserPageState extends State<NewUserPage> {
 
                       Container(
                         alignment: Alignment.topLeft,
-                        child: Text(
+                        child: const Text(
                           "Creación de Usuario",
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 24),
                         ),
                       ),

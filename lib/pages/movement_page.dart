@@ -1,10 +1,16 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_warehouse/models/part_number.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
+import 'package:qr_warehouse/utils/ui.dart';
+import 'package:qr_warehouse/widgets/confirm_widget.dart';
 import 'package:qr_warehouse/widgets/custom_icon_button.dart';
+import 'package:quickalert/quickalert.dart';
+// import 'package:quickalert/quickalert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MovementPage extends StatefulWidget {
@@ -44,7 +50,18 @@ class _MovementPageState extends State<MovementPage> {
     super.dispose();
   }
 
-  updateInventoryAndRecords(type) async {
+  num calculateFinalQuantity(String action, num initialQuantity) {
+    final num finalQuantity;
+    if (action == "substract") {
+      finalQuantity = initialQuantity - num.parse(quantityController.text);
+    } else {
+      finalQuantity = initialQuantity + num.parse(quantityController.text);
+    }
+
+    return finalQuantity;
+  }
+
+  updateInventoryAndRecords() async {
     // create a reference for passed variables
     // int initialQuantity = int.parse(widget.partNumber.quantity);
     num initialQuantity =
@@ -67,14 +84,18 @@ class _MovementPageState extends State<MovementPage> {
     /// UPDATE
 
     /// Calculating updated quantity
-    num finalQuantity;
-    if (action == "substract") {
-      finalQuantity = initialQuantity - num.parse(quantityController.text);
-      type = "Salida";
-    } else {
-      finalQuantity = initialQuantity + num.parse(quantityController.text);
-      type = "Entrada";
-    }
+    num finalQuantity = calculateFinalQuantity(action, initialQuantity);
+
+    // Determines type of movement
+    final String type = action == "substract" ? "Salida" : "Entrada";
+
+    // if (action == "substract") {
+    //   finalQuantity = initialQuantity - num.parse(quantityController.text);
+    //   type = "Salida";
+    // } else {
+    //   finalQuantity = initialQuantity + num.parse(quantityController.text);
+    //   type = "Entrada";
+    // }
 
     // values that are going to be updated in query
     String values = "quantity = $finalQuantity";
@@ -136,7 +157,6 @@ class _MovementPageState extends State<MovementPage> {
     final screenWidth = MediaQuery.of(context).size.width;
     final double desktopPadding = screenWidth * 0.33;
     final double mobilePadding = screenWidth * 0.10;
-    String type = "";
 
     return Scaffold(
       backgroundColor: const Color(0xFF17153B),
@@ -196,6 +216,10 @@ class _MovementPageState extends State<MovementPage> {
                     // quantity text field
                     TextFormField(
                       controller: quantityController,
+                      keyboardType: TextInputType.number,
+                      // inputFormatters: <TextInputFormatter>[
+                      //   FilteringTextInputFormatter.digitsOnly
+                      // ],
                       decoration: InputDecoration(
                         hintText: 'Cantidad',
                         hintStyle: TextStyle(color: Colors.grey[500]),
@@ -227,7 +251,49 @@ class _MovementPageState extends State<MovementPage> {
                       width: double.infinity,
                       onPressed: () async {
                         if (formKey.currentState!.validate()) {
-                          updateInventoryAndRecords(type);
+                          // updateInventoryAndRecords();
+
+                          Ui.showWidgetAlert(
+                            context,
+                            ConfirmWidget(
+                              partNumber: widget.partNumber,
+                              addedQty: quantityController.text,
+                              newQty: calculateFinalQuantity(widget.action,
+                                      num.parse(widget.partNumber.quantity))
+                                  .toString(),
+                            ),
+                            updateInventoryAndRecords,
+                            widget.action,
+                          );
+
+                          // QuickAlert.show(
+                          //   backgroundColor: const Color(0xFF17153B),
+                          //   width: 600,
+                          //   context: context,
+                          //   type: QuickAlertType.custom,
+                          //   barrierDismissible: true,
+                          //   confirmBtnText: 'Confirmar',
+                          //   confirmBtnColor: const Color(0xFF433D8B),
+                          //   customAsset: 'assets/images/confirmation.gif',
+                          //   widget: ConfirmWidget(
+                          //     partNumber: widget.partNumber,
+                          //     addedQty: quantityController.text,
+                          //     newQty: calculateFinalQuantity(widget.action,
+                          //             num.parse(widget.partNumber.quantity))
+                          //         .toString(),
+                          //   ),
+                          //   onConfirmBtnTap: () {
+                          //     navigator!.pop(context);
+                          //     updateInventoryAndRecords();
+                          //   },
+                          //   title:
+                          //       '¿Estás seguro que deseas realizar este movimiento?',
+                          //   titleColor: Colors.white,
+                          //   text: widget.action == "substract"
+                          //       ? 'Salida de Inventario'
+                          //       : 'Entrada de Inventario',
+                          //   textColor: Colors.white,
+                          // );
                         }
                       },
                     ),

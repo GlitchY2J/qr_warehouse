@@ -214,23 +214,23 @@ class _DetailsPageState extends State<DetailsPage> {
 
                 // Button to add parts to order
                 CustomIconButton(
-                  text: "Surtir Orden",
+                  text: "Salida de Inventario",
                   icon: Icons.move_down,
                   height: 50,
                   width: screenWidth,
-                  onPressed: () =>
-                      _goToMovementPage(context, "substract", "Surtir Orden"),
+                  onPressed: () => _goToMovementPage(
+                      context, "substract", "Salida de $partNumber"),
                 ),
                 const SizedBox(height: 20),
 
                 // Button to add parts to inventory
                 CustomIconButton(
-                  text: "Añadir a Inventario",
+                  text: "Entrada de Inventario",
                   icon: Icons.move_up,
                   height: 50,
                   width: screenWidth,
-                  onPressed: () =>
-                      _goToMovementPage(context, "add", "Añadir a Inventario"),
+                  onPressed: () => _goToMovementPage(
+                      context, "add", "Entrada de $partNumber"),
                 ),
                 const SizedBox(height: 20),
 
