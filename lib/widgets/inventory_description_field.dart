@@ -17,7 +17,7 @@ class InventoryDescriptionField extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
       height: 61,
-      width: screenWidth < 800 ? screenWidth : screenWidth * 0.3,
+      width: screenWidth <= 800 ? screenWidth : screenWidth * 0.5,
       child: Row(
         children: [
           Expanded(

@@ -3,8 +3,6 @@ import 'package:qr_warehouse/pages/main_page.dart';
 import 'package:qr_warehouse/widgets/add_new_user_tile.dart';
 import 'package:qr_warehouse/widgets/add_part_number_tile..dart';
 import 'package:qr_warehouse/widgets/astro_logo.dart';
-import 'package:qr_warehouse/widgets/astrophysics_logo.dart';
-import 'package:qr_warehouse/pages/new_user_page.dart';
 import 'package:qr_warehouse/widgets/inventory_tile.dart';
 import 'package:qr_warehouse/widgets/welcome_text.dart';
 
@@ -42,9 +40,10 @@ class CustomDrawer extends StatelessWidget {
                     Text(
                       'QR WAREHOUSE',
                       style: TextStyle(
-                          fontFamily: 'Staatliches',
-                          fontSize: 35,
-                          color: Color(0xFFB174E7)),
+                        fontFamily: 'Staatliches',
+                        fontSize: 35,
+                        color: Color(0xFFB174E7),
+                      ),
                     ),
                   ],
                 ),

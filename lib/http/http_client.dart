@@ -1,10 +1,13 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 //import 'package:flutter/foundation.dart';
 
 class DatabaseHelper {
   // choose between testing or production database
-  static const String _baseUrl = 'http://10.30.0.42/Dashboard/qr_warehouse';
+  static const String _baseUrl = kDebugMode
+      ? 'http://10.30.0.42/Dashboard/qr_warehouse/testing'
+      : 'http://10.30.0.42/Dashboard/qr_warehouse';
 
   /// GET METHOD
   static Future<http.Response> get(String endpoint, dynamic data) async {
@@ -30,6 +33,17 @@ class DatabaseHelper {
       Uri.parse('$_baseUrl/$endpoint'),
       body: data,
     );
+    return _handleResponse(response);
+  }
+
+  // BULK UPDATE METHOD
+  static Future<Map<String, dynamic>> bulkUpdate(
+      String endpoint, dynamic data) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/$endpoint'),
+      body: jsonEncode(data),
+    );
+
     return _handleResponse(response);
   }
 

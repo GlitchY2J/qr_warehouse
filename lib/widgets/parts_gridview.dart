@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_warehouse/models/part_number.dart';
@@ -8,7 +6,6 @@ import 'package:qr_warehouse/widgets/inventory_card_widgets/inventory_color_indi
 import 'package:qr_warehouse/widgets/inventory_card_widgets/inventory_container_card.dart';
 import 'package:qr_warehouse/widgets/inventory_card_widgets/inventory_description_card.dart';
 import 'package:qr_warehouse/widgets/inventory_card_widgets/inventory_location_card.dart';
-import 'package:qr_warehouse/widgets/inventory_card_widgets/inventory_measure_card.dart';
 import 'package:qr_warehouse/widgets/inventory_card_widgets/inventory_partnumber_card.dart';
 import 'package:qr_warehouse/widgets/inventory_card_widgets/inventory_quantity_card.dart';
 
@@ -62,16 +59,28 @@ class _PartsGridViewState extends State<PartsGridView> {
 
   @override
   Widget build(BuildContext context) {
+    final width = widget.screenWidth;
+
     return SizedBox(
       height: widget.screenHeight - 400,
-      width: widget.screenWidth < 800
-          ? widget.screenWidth
-          : widget.screenWidth * 0.4,
+      width: width <= 800
+          ? width
+          : width >= 800 && width <= 1200
+              ? width * 0.6
+              : width >= 1200 && width <= 1600
+                  ? width * 0.6
+                  : width * 0.5,
       child: GridView.builder(
           controller: scrollController,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 1,
-            childAspectRatio: 6,
+            childAspectRatio: width <= 800
+                ? 6
+                : width >= 800 && width <= 1200
+                    ? 5
+                    : width >= 1200 && width <= 1600
+                        ? 7.5
+                        : 7,
             crossAxisSpacing: 20,
             mainAxisSpacing: 20,
           ),

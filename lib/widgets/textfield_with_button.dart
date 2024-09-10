@@ -19,7 +19,7 @@ class TextFieldWithButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: screenWidth < 800 ? screenWidth : screenWidth * 0.3,
+      width: screenWidth <= 800 ? screenWidth : screenWidth * 0.5,
       margin: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
       height: 50,
       child: Row(

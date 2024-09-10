@@ -17,7 +17,7 @@ class Ui {
       widget: widget,
       onConfirmBtnTap: () {
         navigator!.pop(context);
-        onConfirm;
+        onConfirm();
       },
       title: '¿Estás seguro que deseas realizar este movimiento?',
       titleColor: Colors.white,
@@ -25,6 +25,12 @@ class Ui {
           ? 'Salida de Inventario'
           : 'Entrada de Inventario',
       textColor: Colors.white,
+    );
+  }
+
+  static void showSnackbar(BuildContext context, String content) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(content)),
     );
   }
 }

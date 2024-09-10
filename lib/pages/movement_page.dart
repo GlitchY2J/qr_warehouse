@@ -1,16 +1,13 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_warehouse/models/part_number.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
 import 'package:qr_warehouse/utils/ui.dart';
 import 'package:qr_warehouse/widgets/confirm_widget.dart';
 import 'package:qr_warehouse/widgets/custom_icon_button.dart';
-import 'package:quickalert/quickalert.dart';
-// import 'package:quickalert/quickalert.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MovementPage extends StatefulWidget {
@@ -88,14 +85,6 @@ class _MovementPageState extends State<MovementPage> {
 
     // Determines type of movement
     final String type = action == "substract" ? "Salida" : "Entrada";
-
-    // if (action == "substract") {
-    //   finalQuantity = initialQuantity - num.parse(quantityController.text);
-    //   type = "Salida";
-    // } else {
-    //   finalQuantity = initialQuantity + num.parse(quantityController.text);
-    //   type = "Entrada";
-    // }
 
     // values that are going to be updated in query
     String values = "quantity = $finalQuantity";
@@ -181,6 +170,7 @@ class _MovementPageState extends State<MovementPage> {
                 key: formKey,
                 child: Column(
                   children: [
+                    // Title
                     Container(
                       alignment: Alignment.topLeft,
                       child: Text(
@@ -251,8 +241,7 @@ class _MovementPageState extends State<MovementPage> {
                       width: double.infinity,
                       onPressed: () async {
                         if (formKey.currentState!.validate()) {
-                          // updateInventoryAndRecords();
-
+                          // Shows Confirmation Widget
                           Ui.showWidgetAlert(
                             context,
                             ConfirmWidget(
@@ -262,44 +251,12 @@ class _MovementPageState extends State<MovementPage> {
                                       num.parse(widget.partNumber.quantity))
                                   .toString(),
                             ),
-                            updateInventoryAndRecords,
+                            () => updateInventoryAndRecords(),
                             widget.action,
                           );
-
-                          // QuickAlert.show(
-                          //   backgroundColor: const Color(0xFF17153B),
-                          //   width: 600,
-                          //   context: context,
-                          //   type: QuickAlertType.custom,
-                          //   barrierDismissible: true,
-                          //   confirmBtnText: 'Confirmar',
-                          //   confirmBtnColor: const Color(0xFF433D8B),
-                          //   customAsset: 'assets/images/confirmation.gif',
-                          //   widget: ConfirmWidget(
-                          //     partNumber: widget.partNumber,
-                          //     addedQty: quantityController.text,
-                          //     newQty: calculateFinalQuantity(widget.action,
-                          //             num.parse(widget.partNumber.quantity))
-                          //         .toString(),
-                          //   ),
-                          //   onConfirmBtnTap: () {
-                          //     navigator!.pop(context);
-                          //     updateInventoryAndRecords();
-                          //   },
-                          //   title:
-                          //       '¿Estás seguro que deseas realizar este movimiento?',
-                          //   titleColor: Colors.white,
-                          //   text: widget.action == "substract"
-                          //       ? 'Salida de Inventario'
-                          //       : 'Entrada de Inventario',
-                          //   textColor: Colors.white,
-                          // );
                         }
                       },
                     ),
-
-                    const SizedBox(height: 32),
-                    // Add Part Number Button
                   ],
                 ),
               ),

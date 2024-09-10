@@ -6,7 +6,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import 'package:qr_warehouse/models/part_number.dart';
 import 'package:qr_warehouse/pages/bulk_results.dart';
 import 'package:qr_warehouse/pages/login_page.dart';
@@ -14,8 +13,11 @@ import 'package:qr_warehouse/pages/qr_scan_page.dart';
 import 'package:qr_warehouse/utils/encrypt_data.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
 import 'package:http/http.dart' as http;
+import 'package:qr_warehouse/utils/ui.dart';
+import 'package:qr_warehouse/widgets/confirm_excel_file_to_load.dart';
 import 'package:qr_warehouse/widgets/custom_icon_button.dart';
 import 'package:qr_warehouse/widgets/inventory_description_field.dart';
+import 'package:qr_warehouse/widgets/parts_cant_be_updated.dart';
 import 'package:qr_warehouse/widgets/parts_gridview.dart';
 import 'package:qr_warehouse/widgets/textfield_with_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -40,6 +42,8 @@ class _QueryPageState extends State<QueryPage> {
 
   // List of bulk parts
   List<dynamic> bulkList = [];
+  // List of not updated parts
+  List<dynamic> notUpdated = [];
 
   // filters
   String filterPartNumber = '';
@@ -84,83 +88,65 @@ class _QueryPageState extends State<QueryPage> {
     }
   }
 
-  Future<void> dialogBuilder(BuildContext context) {
+  void bulkUpdate(List<dynamic> partList) async {
+    List<dynamic> updated = [];
+
+    for (dynamic part in partList) {
+      String statement = part[4];
+      String condition = part[5];
+
+      /// Updating Record
+      Map<String, dynamic> result =
+          await FormController.updateRecord(statement, condition);
+
+      // if rows affected is > 0 then part exists and was update
+      // otherwise part doesn't exist or can't be updated
+      if (result["rows"] > 0) {
+        updated.add(part);
+      } else {
+        notUpdated.add(part);
+      }
+    }
+    // end of loop
+
+    // get current user
+    final pref = await SharedPreferences.getInstance();
+    final user = pref.getString("username");
+
+    // get and format datetime
+    final DateTime now = DateTime.now();
+    final dateTimeFormatter = DateFormat('yyyy-MM-dd HH:mm:ss');
+
+    final String formattedDateTime = dateTimeFormatter.format(now);
+
+    for (dynamic part in updated) {
+      String partNumber = part[0];
+      String quantity = part[1];
+      String po = part[2];
+      String so = part[3];
+      // Insert updated into movements
+      String values =
+          "'DEFAULT', '$partNumber', 'Entrada', ${double.parse(quantity)}, '$user', '$formattedDateTime', null, '$so', '$po'";
+
+      // Insert record into Movements table
+      FormController.insertRecords("movements", values);
+    }
+  }
+
+  Future<void> dialogBuilder(
+      BuildContext context, List<dynamic> list, Widget widget) {
     return showDialog(
         context: context,
         builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text("Listado de piezas para Inventario"),
-            backgroundColor: const Color(0xFF17153B),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(
-                  width: 1000,
-                  height: 700,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.all(Radius.circular(20)),
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 20),
-                          DataTable(
-                            columnSpacing: 300,
-                            columns: const [
-                              DataColumn(label: Text("Numero de Parte")),
-                              DataColumn(label: Text("Cantidad")),
-                              DataColumn(label: Text("PO")),
-                            ],
-                            rows: bulkList.map((row) {
-                              return DataRow(
-                                cells: [
-                                  DataCell(Text(row[0])),
-                                  DataCell(Text(row[1])),
-                                  DataCell(Text(row[2])),
-                                ],
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 400),
-                        child: CustomButton(
-                          text: "Cancelar",
-                          color: Colors.white,
-                          textColor: const Color(0xFF433D8B),
-                          padding: const EdgeInsets.symmetric(horizontal: 30),
-                          onTap: () {},
-                        ),
-                      ),
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 400),
-                        child: CustomButton(
-                          text: "Confirmar",
-                          padding: const EdgeInsets.symmetric(horizontal: 30),
-                          onTap: () {},
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              ],
-            ),
-          );
+          return widget;
         });
   }
 
-  void loadFromExcel() async {
+  Future<List<dynamic>> loadFromExcel() async {
+    List<dynamic> data = [];
+
     FilePickerResult? result = await FilePicker.platform.pickFiles(
-      allowedExtensions: ["xlsx", "xlsm", "csv"],
+      allowedExtensions: ["xlsx", "xlsm"],
       type: FileType.custom,
       allowMultiple: false,
     );
@@ -186,13 +172,15 @@ class _QueryPageState extends State<QueryPage> {
 
                 // [0] part number
                 // [1] quantity
-                // [2] order
-                // [3] statement
-                // [4] conditions
-                bulkList.add([
+                // [2] PO
+                // [3] SO
+                // [4] statement
+                // [5] conditions
+                data.add([
                   row[0]!.value.toString(),
                   row[1]!.value.toString(),
                   row[3]!.value.toString(),
+                  row[4]!.value.toString(),
                   "quantity = quantity + ${row[1]!.value.toString()}",
                   "partnumber = '${row[0]!.value.toString()}';"
                 ]);
@@ -200,17 +188,22 @@ class _QueryPageState extends State<QueryPage> {
             }
           }
           notValidExcel = false;
-          dialogBuilder(context);
         }
       }
 
       if (notValidExcel) {
-        // show message
+        if (mounted) {
+          Ui.showSnackbar(context, "Archivo de Excel no válido.");
+        }
+        return [];
       }
+
+      return data;
 
       //updateRecords(bulkList);
     } else {
       debugPrint("file not selected");
+      return [];
     }
   }
 
@@ -369,8 +362,10 @@ class _QueryPageState extends State<QueryPage> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    final double desktopPadding = screenWidth * 0.22;
     final double mobilePadding = screenWidth * 0.06;
+    final double desktopPaddingMd = screenWidth * 0.1;
+    final double desktopPaddinglg = screenWidth * 0.01;
+    final double desktopPaddingxl = screenWidth * 0.3;
 
     return Scaffold(
       backgroundColor: const Color(0xFF17153B),
@@ -378,63 +373,92 @@ class _QueryPageState extends State<QueryPage> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF17153B),
       ),
-      body: RefreshIndicator(
-        onRefresh: refresh,
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: 14,
-            horizontal: screenWidth < 800 ? mobilePadding : desktopPadding,
-          ),
-          child: Center(
-            child: Column(
-              children: [
-                TextFieldWithButton(
-                  screenWidth: screenWidth,
-                  partNumberController: partNumberController,
-                  updatePartNumber: updatePartNumber,
-                  openScannerScreen: openScannerScreen,
-                ),
+      body: Padding(
+        padding: EdgeInsets.symmetric(
+          vertical: 14,
+          horizontal: screenWidth <= 800
+              ? mobilePadding
+              : screenWidth >= 800 && screenWidth <= 1200
+                  ? desktopPaddingMd
+                  : screenWidth >= 1200 && screenWidth <= 1600
+                      ? desktopPaddinglg
+                      : desktopPaddingxl,
+        ),
+        child: Center(
+          child: Column(
+            children: [
+              TextFieldWithButton(
+                screenWidth: screenWidth,
+                partNumberController: partNumberController,
+                updatePartNumber: updatePartNumber,
+                openScannerScreen: openScannerScreen,
+              ),
 
-                InventoryDescriptionField(
-                  screenWidth: screenWidth,
-                  descriptionController: descriptionController,
-                  updateDescription: updateDescription,
-                ),
-                const SizedBox(height: 48),
-                // Search Button
+              InventoryDescriptionField(
+                screenWidth: screenWidth,
+                descriptionController: descriptionController,
+                updateDescription: updateDescription,
+              ),
+              const SizedBox(height: 48),
+              // Search Button
 
-                CustomIconButton(
-                  text: "Actualizar",
-                  icon: Icons.refresh,
-                  height: 50,
-                  width: screenWidth < 800 ? screenWidth : screenWidth * 0.3,
-                  onPressed: asyncInit,
-                ),
-                const SizedBox(height: 48),
+              CustomIconButton(
+                text: "Actualizar",
+                icon: Icons.refresh,
+                height: 50,
+                width: screenWidth < 800 ? screenWidth : screenWidth * 0.5,
+                onPressed: asyncInit,
+              ),
+              const SizedBox(height: 48),
 
-                !isLoading
-                    ? PartsGridView(
-                        screenHeight: screenHeight,
-                        screenWidth: screenWidth,
-                        parts: parts,
-                        onReturned: getPartNumbers,
-                      )
-                    : Container(),
-              ],
-            ),
+              !isLoading
+                  ? PartsGridView(
+                      screenHeight: screenHeight,
+                      screenWidth: screenWidth,
+                      parts: parts,
+                      onReturned: getPartNumbers,
+                    )
+                  : Container(),
+            ],
           ),
         ),
       ),
-      // floatingActionButton: screenWidth > 800
-      //     ? FloatingActionButton(
-      //         backgroundColor: const Color(0xFFC8ACD6),
-      //         onPressed: () => loadFromExcel(),
-      //         child: const Icon(
-      //           Icons.add,
-      //           color: Color(0xFF17153B),
-      //         ),
-      //       )
-      //     : Container(),
+      floatingActionButton: Platform.isWindows
+          ? FloatingActionButton(
+              backgroundColor: const Color(0xFFC8ACD6),
+              onPressed: () async => {
+                // load data from excel
+                bulkList = await loadFromExcel(),
+
+                // if the excel file is a valid one
+                if (bulkList.isNotEmpty)
+                  {
+                    // show data from excel table and update database
+                    await dialogBuilder(
+                      context,
+                      bulkList,
+                      ConfirmExcelFileToLoad(
+                        list: bulkList,
+                        bulkUpdate: bulkUpdate,
+                      ),
+                    ),
+
+                    // show data not updated
+                    notUpdated.isNotEmpty
+                        ? dialogBuilder(
+                            context,
+                            notUpdated,
+                            PartsCantBeUpdated(list: notUpdated),
+                          )
+                        : null
+                  }
+              },
+              child: const Icon(
+                Icons.add,
+                color: Color(0xFF17153B),
+              ),
+            )
+          : Container(),
     );
   }
 }

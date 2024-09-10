@@ -30,4 +30,10 @@ class FormController {
   static Future<http.Response> getMovements() async {
     return await DatabaseHelper.getMovements("get_movements.php");
   }
+
+  // BULK UPDATE
+  static Future<Map<String, dynamic>> updateBulk(
+      List<Map<String, dynamic>> batch) async {
+    return await DatabaseHelper.post("update_batch.php", batch);
+  }
 }

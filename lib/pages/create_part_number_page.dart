@@ -90,6 +90,9 @@ class _CreatePartNumberPageState extends State<CreatePartNumberPage> {
                       CustomTextField(
                         width: 600,
                         controller: partNumberController,
+                        inputFormatters: [
+                          UpperCaseTextFormatter(),
+                        ],
                         hintText: "Número de Parte",
                       ),
                       const SizedBox(height: 16),
@@ -107,9 +110,11 @@ class _CreatePartNumberPageState extends State<CreatePartNumberPage> {
                         width: 600,
                         controller: quantityController,
                         hintText: "Cantidad",
-                        keyboardType: TextInputType.number,
-                        inputFormatters: <TextInputFormatter>[
-                          FilteringTextInputFormatter.digitsOnly
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true, signed: true),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                              RegExp(r'^-?\d*\.?\d*')),
                         ],
                       ),
                       const SizedBox(height: 16),
@@ -119,6 +124,9 @@ class _CreatePartNumberPageState extends State<CreatePartNumberPage> {
                         width: 600,
                         controller: measurementUnitController,
                         hintText: "Unidad de Medida",
+                        inputFormatters: [
+                          UpperCaseTextFormatter(),
+                        ],
                       ),
                       const SizedBox(height: 16),
 
@@ -127,6 +135,9 @@ class _CreatePartNumberPageState extends State<CreatePartNumberPage> {
                         width: 600,
                         controller: locationController,
                         hintText: "Locación",
+                        inputFormatters: [
+                          UpperCaseTextFormatter(),
+                        ],
                       ),
                       const SizedBox(height: 16),
 
@@ -143,6 +154,9 @@ class _CreatePartNumberPageState extends State<CreatePartNumberPage> {
                         width: 600,
                         controller: mnfPartNumberController,
                         hintText: "Número de Parte del Proveedor",
+                        inputFormatters: [
+                          UpperCaseTextFormatter(),
+                        ],
                       ),
                       const SizedBox(height: 100),
 
@@ -172,6 +186,18 @@ class _CreatePartNumberPageState extends State<CreatePartNumberPage> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class UpperCaseTextFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    return newValue.copyWith(
+      text: newValue.text.toUpperCase(),
     );
   }
 }

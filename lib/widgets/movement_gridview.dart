@@ -9,7 +9,7 @@ import 'package:qr_warehouse/widgets/movement_card_widgets/partnumber_card.dart'
 import 'package:qr_warehouse/widgets/movement_card_widgets/quantity_text_card.dart';
 import 'package:qr_warehouse/widgets/movement_card_widgets/username_card.dart';
 
-class MovementGridView extends StatelessWidget {
+class MovementGridView extends StatefulWidget {
   const MovementGridView({
     super.key,
     required this.screenHeight,
@@ -22,19 +22,65 @@ class MovementGridView extends StatelessWidget {
   final List<Movement> movements;
 
   @override
+  State<MovementGridView> createState() => _MovementGridViewState();
+}
+
+class _MovementGridViewState extends State<MovementGridView> {
+  // number of cards incremented when scrolled down
+  int incrementItems = 10;
+
+  // default number of displayed items
+  int displayedItems = 20;
+
+  // scroll controller
+  final ScrollController scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    // scroll listener, load more items when scrolled down
+    scrollController.addListener(() {
+      if (scrollController.position.pixels ==
+          scrollController.position.maxScrollExtent) {
+        loadMoreItems();
+      }
+    });
+  }
+
+  // increment items to displayed items
+  void loadMoreItems() {
+    setState(() {
+      displayedItems += incrementItems;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final screenWidth = widget.screenWidth;
+
     return Positioned(
-      top: screenHeight * 0.28,
+      top: widget.screenHeight * 0.28,
       left: screenWidth * 0.03,
       width: screenWidth * 0.94,
       bottom: 10,
       child: GridView.builder(
+          controller: scrollController,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: screenWidth < 800 ? 1 : 2,
-              childAspectRatio: screenWidth < 800 ? 6 : 8,
-              mainAxisSpacing: 20,
-              crossAxisSpacing: 20),
-          itemCount: movements.length < 20 ? movements.length : 20,
+            crossAxisCount: screenWidth <= 1200 ? 1 : 2,
+            childAspectRatio: screenWidth <= 800
+                ? 6
+                : screenWidth >= 800 && screenWidth <= 1200
+                    ? 7
+                    : screenWidth >= 1200 && screenWidth <= 1600
+                        ? 5
+                        : 7,
+            mainAxisSpacing: 20,
+            crossAxisSpacing: 20,
+          ),
+          itemCount: widget.movements.length < displayedItems
+              ? widget.movements.length
+              : displayedItems,
           shrinkWrap: true,
           physics: const ScrollPhysics(),
           itemBuilder: (context, index) {
@@ -42,49 +88,49 @@ class MovementGridView extends StatelessWidget {
               children: [
                 /// CARD CONTAINER
                 ContainerCard(
-                  movements: movements,
+                  movements: widget.movements,
                   index: index,
                 ),
 
                 /// PART NUMBER
                 PartNumberCard(
-                  movements: movements,
+                  movements: widget.movements,
                   index: index,
                 ),
 
                 /// PART DESCRIPTION
                 DescriptionCard(
-                  movements: movements,
+                  movements: widget.movements,
                   index: index,
                 ),
 
                 /// ARROW ICON
                 ArrowIconCard(
-                  movements: movements,
+                  movements: widget.movements,
                   index: index,
                 ),
 
                 /// QUANTITY TEXT
                 QuantityTextCard(
-                  movements: movements,
+                  movements: widget.movements,
                   index: index,
                 ),
 
                 /// ORDER NUMBER
                 OrderNumberCard(
-                  movements: movements,
+                  movements: widget.movements,
                   index: index,
                 ),
 
                 /// USERNAME
                 UsernameCard(
-                  movements: movements,
+                  movements: widget.movements,
                   index: index,
                 ),
 
                 /// Datetime
                 DateTimeCard(
-                  movements: movements,
+                  movements: widget.movements,
                   index: index,
                 ),
               ],
