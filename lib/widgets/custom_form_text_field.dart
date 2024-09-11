@@ -17,6 +17,7 @@ class CustomFormTextField extends StatelessWidget {
     this.interactiveSelection,
     this.enabled,
     this.onChanged,
+    this.focusNode,
   });
 
   final TextEditingController controller;
@@ -32,12 +33,14 @@ class CustomFormTextField extends StatelessWidget {
   final Widget? suffixIcon;
   final int? maxLength;
   final bool? interactiveSelection;
+  final FocusNode? focusNode;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: width,
       child: TextFormField(
+        focusNode: focusNode,
         obscureText: obscureText,
         enabled: enabled,
         maxLength: maxLength,

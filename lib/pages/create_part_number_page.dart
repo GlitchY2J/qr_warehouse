@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_warehouse/pages/qr_code_page.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
+import 'package:qr_warehouse/widgets/custom_form_text_field.dart';
 import 'package:qr_warehouse/widgets/custom_icon_button.dart';
 import 'package:qr_warehouse/widgets/custom_textfield.dart';
 
@@ -14,6 +15,12 @@ class CreatePartNumberPage extends StatefulWidget {
 }
 
 class _CreatePartNumberPageState extends State<CreatePartNumberPage> {
+  // formkey to validate form
+  final formKey = GlobalKey<FormState>();
+
+  // Focus Node
+  final focusNode = FocusNode();
+  // Text Controllers
   final partNumberController = TextEditingController();
   final descriptionController = TextEditingController();
   final quantityController = TextEditingController();
@@ -31,7 +38,32 @@ class _CreatePartNumberPageState extends State<CreatePartNumberPage> {
     manufacterController.dispose();
     mnfPartNumberController.dispose();
     measurementUnitController.dispose();
+    focusNode.dispose();
     super.dispose();
+  }
+
+  void validateForm() {
+    if (formKey.currentState!.validate()) {
+      addToInventory(context);
+    }
+  }
+
+  String? validatePartNumber(value) {
+    // part number regex
+    RegExp regex = RegExp(r'\d{2}-\d{2}-[A-Z0-9]{4}-\d{2}|(MISC)');
+    String? match = regex.stringMatch(value);
+
+    if (value == null || value.isEmpty || match == null) {
+      return 'Ingresa un número de parte válido.';
+    }
+    return null;
+  }
+
+  String? validateQuantity(value) {
+    if (value == null || value.isEmpty) {
+      return 'Ingresa una cantidad.';
+    }
+    return null;
   }
 
   addToInventory(context) async {
@@ -40,7 +72,7 @@ class _CreatePartNumberPageState extends State<CreatePartNumberPage> {
     String measurementUnit = measurementUnitController.text;
     String quantity = quantityController.text;
     String min = "0";
-    String max = "100";
+    String max = "0";
     String location = locationController.text;
     String manufacter = manufacterController.text;
     String mnfPartNumber = mnfPartNumberController.text;
@@ -68,8 +100,23 @@ class _CreatePartNumberPageState extends State<CreatePartNumberPage> {
     );
   }
 
+  void clearForm() {
+    partNumberController.clear();
+    descriptionController.clear();
+    quantityController.clear();
+    locationController.clear();
+    manufacterController.clear();
+    mnfPartNumberController.clear();
+    measurementUnitController.clear();
+    focusNode.requestFocus();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final double desktopPadding = screenWidth * 0.33;
+    final double mobilePadding = screenWidth * 0.10;
+
     return Scaffold(
       backgroundColor: const Color(0xFF17153B),
       resizeToAvoidBottomInset: false,
@@ -78,27 +125,42 @@ class _CreatePartNumberPageState extends State<CreatePartNumberPage> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 50),
+          padding: EdgeInsets.symmetric(
+            vertical: 14,
+            horizontal: screenWidth < 1200 ? mobilePadding : desktopPadding,
+          ),
           child: Center(
             child: Column(
               children: [
+                Container(
+                  alignment: Alignment.topLeft,
+                  child: const Text(
+                    'Nuevo Número de Parte',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+                  ),
+                ),
+                const SizedBox(height: 50),
                 Form(
+                  key: formKey,
                   child: Column(
                     children: [
                       const SizedBox(height: 50),
                       // Part Number
-                      CustomTextField(
+                      CustomFormTextField(
                         width: 600,
+                        focusNode: focusNode,
                         controller: partNumberController,
                         inputFormatters: [
                           UpperCaseTextFormatter(),
                         ],
                         hintText: "Número de Parte",
+                        validator: (value) => validatePartNumber(value),
+                        onFieldSubmitted: (_) => validateForm(),
                       ),
                       const SizedBox(height: 16),
 
                       // Description
-                      CustomTextField(
+                      CustomFormTextField(
                         width: 600,
                         controller: descriptionController,
                         hintText: "Descripción",
@@ -106,16 +168,18 @@ class _CreatePartNumberPageState extends State<CreatePartNumberPage> {
                       const SizedBox(height: 16),
 
                       // Quantity
-                      CustomTextField(
+                      CustomFormTextField(
                         width: 600,
                         controller: quantityController,
                         hintText: "Cantidad",
-                        keyboardType: const TextInputType.numberWithOptions(
+                        textInputType: const TextInputType.numberWithOptions(
                             decimal: true, signed: true),
                         inputFormatters: [
                           FilteringTextInputFormatter.allow(
                               RegExp(r'^-?\d*\.?\d*')),
                         ],
+                        validator: (value) => validateQuantity(value),
+                        onFieldSubmitted: (_) => validateForm(),
                       ),
                       const SizedBox(height: 16),
 
@@ -166,9 +230,17 @@ class _CreatePartNumberPageState extends State<CreatePartNumberPage> {
                         text: "Añadir al Inventario",
                         icon: Icons.add,
                         height: 50,
-                        onPressed: () => addToInventory(context),
+                        onPressed: () => validateForm(),
                       ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 22),
+                      CustomIconButton(
+                        width: 600,
+                        text: "Limpiar Formulario",
+                        icon: Icons.cleaning_services,
+                        height: 50,
+                        onPressed: () => clearForm(),
+                      ),
+                      const SizedBox(height: 22),
 
                       // Generate QR Code
                       CustomIconButton(
@@ -190,6 +262,7 @@ class _CreatePartNumberPageState extends State<CreatePartNumberPage> {
   }
 }
 
+// helper that format text to uppercase
 class UpperCaseTextFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(

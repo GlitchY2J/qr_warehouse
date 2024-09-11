@@ -5,6 +5,7 @@ import 'package:excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_warehouse/models/part_number.dart';
 import 'package:qr_warehouse/pages/bulk_results.dart';
@@ -146,7 +147,7 @@ class _QueryPageState extends State<QueryPage> {
     List<dynamic> data = [];
 
     FilePickerResult? result = await FilePicker.platform.pickFiles(
-      allowedExtensions: ["xlsx", "xlsm"],
+      allowedExtensions: ["xlsx"],
       type: FileType.custom,
       allowMultiple: false,
     );
@@ -154,53 +155,62 @@ class _QueryPageState extends State<QueryPage> {
     if (result != null) {
       String file = result.paths.single!;
       Uint8List bytes = await File(file).readAsBytes();
-      Excel excel = Excel.decodeBytes(bytes);
 
-      // variable to check if the sheet accounting data exists
-      bool notValidExcel = true;
+      // checking if excel has password
+      try {
+        Excel excel = Excel.decodeBytes(bytes);
 
-      // gets all sheets
-      for (var table in excel.tables.keys) {
-        // if sheet is name "Accounting Data"
-        if (table == "Accounting Data") {
-          // checks all rows
-          for (var row in excel.tables[table]!.rows) {
-            if (row[0] != null) {
-              // if row is 14 or higher
-              if (row[0]!.rowIndex > 12) {
-                // store values in a list
+        // variable to check if the sheet accounting data exists
+        bool notValidExcel = true;
 
-                // [0] part number
-                // [1] quantity
-                // [2] PO
-                // [3] SO
-                // [4] statement
-                // [5] conditions
-                data.add([
-                  row[0]!.value.toString(),
-                  row[1]!.value.toString(),
-                  row[3]!.value.toString(),
-                  row[4]!.value.toString(),
-                  "quantity = quantity + ${row[1]!.value.toString()}",
-                  "partnumber = '${row[0]!.value.toString()}';"
-                ]);
+        // gets all sheets
+        for (var table in excel.tables.keys) {
+          // if sheet is name "Accounting Data"
+          if (table == "Accounting Data") {
+            // checks all rows
+            for (var row in excel.tables[table]!.rows) {
+              if (row[0] != null) {
+                // if row is 14 or higher
+                if (row[0]!.rowIndex > 12) {
+                  // store values in a list
+
+                  // [0] part number
+                  // [1] quantity
+                  // [2] PO
+                  // [3] SO
+                  // [4] statement
+                  // [5] conditions
+                  data.add([
+                    row[0]!.value.toString(),
+                    row[1]!.value.toString(),
+                    row[3]!.value.toString(),
+                    row[4]!.value.toString(),
+                    "quantity = quantity + ${row[1]!.value.toString()}",
+                    "partnumber = '${row[0]!.value.toString()}';"
+                  ]);
+                }
               }
             }
+            notValidExcel = false;
           }
-          notValidExcel = false;
         }
-      }
 
-      if (notValidExcel) {
+        if (notValidExcel) {
+          if (mounted) {
+            Ui.showSnackbar(context, "Archivo de Excel no válido.");
+          }
+          return [];
+        }
+
+        return data;
+
+        //updateRecords(bulkList);
+      } catch (e) {
         if (mounted) {
           Ui.showSnackbar(context, "Archivo de Excel no válido.");
         }
         return [];
       }
-
-      return data;
-
-      //updateRecords(bulkList);
     } else {
       debugPrint("file not selected");
       return [];

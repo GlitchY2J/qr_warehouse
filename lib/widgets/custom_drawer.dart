@@ -58,10 +58,10 @@ class CustomDrawer extends StatelessWidget {
               ),
             ],
           ),
+          InventoryTile(refreshMovements: refreshMovements),
           userType == "Admin" || savedUserType == "Admin"
               ? AddPartNumberTile(getMovements: refreshMovements)
               : Container(),
-          InventoryTile(refreshMovements: refreshMovements),
           userType == "Admin" || savedUserType == "Admin"
               ? AddNewUserTile(getMovements: refreshMovements)
               : Container(),
