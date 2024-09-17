@@ -38,6 +38,7 @@ class _DetailsPageState extends State<DetailsPage> {
     super.initState();
   }
 
+  // GET TYPE OF USER
   dynamic getSharedPrefs() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -45,6 +46,7 @@ class _DetailsPageState extends State<DetailsPage> {
     });
   }
 
+  // PARSE NUMBER AS INTEGER OR DOUBLE
   String integerOrDouble(String value) {
     if (num.parse(value) % 1 == 0) {
       return int.parse(value).toString();
@@ -53,6 +55,7 @@ class _DetailsPageState extends State<DetailsPage> {
     }
   }
 
+  // SET DETAILS VALUES
   setDetailsValues() {
     partNumber = myPartNumber.partNumber;
     description = myPartNumber.description;
@@ -61,6 +64,7 @@ class _DetailsPageState extends State<DetailsPage> {
     quantity = integerOrDouble(myPartNumber.quantity);
   }
 
+  // GO TO MOVEMENT PAGE
   _goToMovementPage(BuildContext context, String action, String title) async {
     await Navigator.push(
       context,
@@ -84,6 +88,7 @@ class _DetailsPageState extends State<DetailsPage> {
     });
   }
 
+  // DISABLE PART NUMBER
   disablePartNumber(String partNumber) async {
     String values = "isActive = 0";
     String condition = "partnumber = '$partNumber'";
@@ -96,6 +101,7 @@ class _DetailsPageState extends State<DetailsPage> {
     } else {}
   }
 
+  // GENERATE QR CODE
   void goToQRCodePage() {
     Navigator.of(context).push(
       CupertinoPageRoute(
@@ -106,6 +112,7 @@ class _DetailsPageState extends State<DetailsPage> {
     );
   }
 
+  // WIDGET BUILD
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -116,10 +123,12 @@ class _DetailsPageState extends State<DetailsPage> {
     return Scaffold(
       // background Color
       backgroundColor: const Color(0xFF17153B),
-      // App bar
+      // APP BAR
       appBar: AppBar(
         backgroundColor: const Color(0xFF17153B),
       ),
+      // APP BAR
+      // FLOATING ACTION BUTTON
       floatingActionButton: CustomFloatingActionButton(
         onPressed: () => goToQRCodePage(),
         icon: const Icon(
@@ -127,8 +136,9 @@ class _DetailsPageState extends State<DetailsPage> {
           color: Color(0xFF17153B),
         ),
       ),
+      // FLOATING ACTION BUTTON
 
-      // body
+      // BODY
       body: SingleChildScrollView(
         // padding
         child: Padding(

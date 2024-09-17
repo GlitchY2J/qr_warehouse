@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_warehouse/pages/qr_code_page.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
+import 'package:qr_warehouse/utils/ui.dart';
+import 'package:qr_warehouse/widgets/custom_dropdown_button.dart';
 import 'package:qr_warehouse/widgets/custom_form_text_field.dart';
 import 'package:qr_warehouse/widgets/custom_icon_button.dart';
-import 'package:qr_warehouse/widgets/custom_textfield.dart';
 
 class CreatePartNumberPage extends StatefulWidget {
   const CreatePartNumberPage({super.key});
@@ -18,8 +19,18 @@ class _CreatePartNumberPageState extends State<CreatePartNumberPage> {
   // formkey to validate form
   final formKey = GlobalKey<FormState>();
 
+  // String showed if the user doesn't select a measure unit and tries to add to inventory
+  String? dropDownError;
+
+  // currently selected measure unit
+  String? selectedMeasure;
+
+  // list of available measurement units
+  List<String> measurements = ["EACH", "SET", "KIT", "IN", "FT", "YD"];
+
   // Focus Node
   final focusNode = FocusNode();
+
   // Text Controllers
   final partNumberController = TextEditingController();
   final descriptionController = TextEditingController();
@@ -27,7 +38,6 @@ class _CreatePartNumberPageState extends State<CreatePartNumberPage> {
   final locationController = TextEditingController();
   final manufacterController = TextEditingController();
   final mnfPartNumberController = TextEditingController();
-  final measurementUnitController = TextEditingController();
 
   @override
   void dispose() {
@@ -37,20 +47,32 @@ class _CreatePartNumberPageState extends State<CreatePartNumberPage> {
     locationController.dispose();
     manufacterController.dispose();
     mnfPartNumberController.dispose();
-    measurementUnitController.dispose();
     focusNode.dispose();
     super.dispose();
   }
 
+  // function that validated form before updating the database
   void validateForm() {
-    if (formKey.currentState!.validate()) {
+    bool isValid = formKey.currentState!.validate();
+
+    if (selectedMeasure == "" || selectedMeasure == null) {
+      setState(() {
+        dropDownError = "Selecciona una medida";
+        isValid = false;
+      });
+    }
+
+    if (isValid) {
       addToInventory(context);
+    } else {
+      Ui.showSnackbar(context, "Error en el registro");
     }
   }
 
+  // validates part number
   String? validatePartNumber(value) {
     // part number regex
-    RegExp regex = RegExp(r'\d{2}-\d{2}-[A-Z0-9]{4}-\d{2}|(MISC)');
+    RegExp regex = RegExp(r'\d{2}-[A-Z0-9]{1}\d{1}-[A-Z0-9]{4}-\d{2}|(MISC)');
     String? match = regex.stringMatch(value);
 
     if (value == null || value.isEmpty || match == null) {
@@ -59,6 +81,7 @@ class _CreatePartNumberPageState extends State<CreatePartNumberPage> {
     return null;
   }
 
+  // validates quantity
   String? validateQuantity(value) {
     if (value == null || value.isEmpty) {
       return 'Ingresa una cantidad.';
@@ -66,10 +89,10 @@ class _CreatePartNumberPageState extends State<CreatePartNumberPage> {
     return null;
   }
 
+  // updates database with new values
   addToInventory(context) async {
     String partNumber = partNumberController.text;
     String description = descriptionController.text;
-    String measurementUnit = measurementUnitController.text;
     String quantity = quantityController.text;
     String min = "0";
     String max = "0";
@@ -79,7 +102,7 @@ class _CreatePartNumberPageState extends State<CreatePartNumberPage> {
     bool isActive = true;
 
     String values =
-        "'$partNumber', '$description', '$measurementUnit', $quantity, $min, $max, '$location', '$manufacter', '$mnfPartNumber', $isActive";
+        "'$partNumber', '$description', '$selectedMeasure', $quantity, $min, $max, '$location', '$manufacter', '$mnfPartNumber', $isActive";
     Map<String, dynamic> result =
         await FormController.insertRecords("inventory", values);
 
@@ -107,7 +130,9 @@ class _CreatePartNumberPageState extends State<CreatePartNumberPage> {
     locationController.clear();
     manufacterController.clear();
     mnfPartNumberController.clear();
-    measurementUnitController.clear();
+    setState(() {
+      selectedMeasure = null;
+    });
     focusNode.requestFocus();
   }
 
@@ -164,63 +189,102 @@ class _CreatePartNumberPageState extends State<CreatePartNumberPage> {
                         width: 600,
                         controller: descriptionController,
                         hintText: "Descripción",
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Quantity
-                      CustomFormTextField(
-                        width: 600,
-                        controller: quantityController,
-                        hintText: "Cantidad",
-                        textInputType: const TextInputType.numberWithOptions(
-                            decimal: true, signed: true),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                              RegExp(r'^-?\d*\.?\d*')),
-                        ],
-                        validator: (value) => validateQuantity(value),
                         onFieldSubmitted: (_) => validateForm(),
                       ),
                       const SizedBox(height: 16),
 
-                      // Measurement Unit
-                      CustomTextField(
+                      //QUANTITY AND MEASUREMENT UNIT
+                      SizedBox(
                         width: 600,
-                        controller: measurementUnitController,
-                        hintText: "Unidad de Medida",
-                        inputFormatters: [
-                          UpperCaseTextFormatter(),
-                        ],
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // Quantity
+                            CustomFormTextField(
+                              width:
+                                  screenWidth < 1200 ? 400 : screenWidth * 0.2,
+                              controller: quantityController,
+                              hintText: "Cantidad",
+                              textInputType:
+                                  const TextInputType.numberWithOptions(
+                                      decimal: true, signed: true),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                    RegExp(r'^-?\d*\.?\d*')),
+                              ],
+                              validator: (value) => validateQuantity(value),
+                              onFieldSubmitted: (_) => validateForm(),
+                            ),
+
+                            // MEASUUREMENT UNIT
+                            Column(
+                              children: [
+                                CustomDropDownButton(
+                                  menuItems: const [
+                                    "EACH",
+                                    "SET",
+                                    "KIT",
+                                    "IN",
+                                    "FT",
+                                    "YD"
+                                  ],
+                                  type: "Measures",
+                                  hint: "Medida",
+                                  selectedValue: selectedMeasure,
+                                  icon: Icons.aspect_ratio_sharp,
+                                  onChanged: (String? value) {
+                                    setState(() {
+                                      selectedMeasure = value;
+                                      dropDownError = null;
+                                    });
+                                  },
+                                ),
+                                dropDownError == null
+                                    ? const SizedBox.shrink()
+                                    : Text(
+                                        dropDownError ?? "",
+                                        style: const TextStyle(
+                                          color: Color(0xFFAF8690),
+                                        ),
+                                      )
+                              ],
+                            )
+                          ],
+                        ),
                       ),
+
                       const SizedBox(height: 16),
 
                       // Location
-                      CustomTextField(
+                      CustomFormTextField(
                         width: 600,
                         controller: locationController,
                         hintText: "Locación",
                         inputFormatters: [
                           UpperCaseTextFormatter(),
                         ],
+                        onFieldSubmitted: (_) => validateForm(),
                       ),
                       const SizedBox(height: 16),
 
                       // Manufacter
-                      CustomTextField(
+                      CustomFormTextField(
                         width: 600,
                         controller: manufacterController,
                         hintText: "Proveedor",
+                        onFieldSubmitted: (_) => validateForm(),
                       ),
                       const SizedBox(height: 16),
 
                       // Manufacter Part Number
-                      CustomTextField(
+                      CustomFormTextField(
                         width: 600,
                         controller: mnfPartNumberController,
                         hintText: "Número de Parte del Proveedor",
                         inputFormatters: [
                           UpperCaseTextFormatter(),
                         ],
+                        onFieldSubmitted: (_) => validateForm(),
                       ),
                       const SizedBox(height: 100),
 

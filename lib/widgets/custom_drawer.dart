@@ -60,11 +60,25 @@ class CustomDrawer extends StatelessWidget {
           ),
           InventoryTile(refreshMovements: refreshMovements),
           userType == "Admin" || savedUserType == "Admin"
-              ? AddPartNumberTile(getMovements: refreshMovements)
-              : Container(),
-          userType == "Admin" || savedUserType == "Admin"
-              ? AddNewUserTile(getMovements: refreshMovements)
-              : Container(),
+              ? Column(
+                  children: [
+                    AddPartNumberTile(getMovements: refreshMovements),
+                    AddNewUserTile(getMovements: refreshMovements)
+                  ],
+                )
+              : SizedBox.shrink(),
+          // userType == "Admin" ||
+          //         userType == "Debug" ||
+          //         savedUserType == "Admin" ||
+          //         savedUserType == "Debug"
+          //     ? AddPartNumberTile(getMovements: refreshMovements)
+          //     : Container(),
+          // userType == "Admin" ||
+          //         userType == "Debug" ||
+          //         savedUserType == "Admin" ||
+          //         savedUserType == "Debug"
+          //     ? AddNewUserTile(getMovements: refreshMovements)
+          //     : Container(),
         ],
       ),
     );

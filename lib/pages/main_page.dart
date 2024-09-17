@@ -3,12 +3,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:qr_warehouse/env.dart';
 import 'package:qr_warehouse/models/movement.dart';
 import 'package:qr_warehouse/models/user.dart';
 import 'package:qr_warehouse/pages/login_page.dart';
 import 'package:qr_warehouse/pages/movement_report.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
 import 'package:http/http.dart' as http;
+import 'package:qr_warehouse/widgets/custom_bottom_sheet.dart';
 import 'package:qr_warehouse/widgets/custom_positioned_button.dart';
 import 'package:qr_warehouse/widgets/custom_drawer.dart';
 import 'package:qr_warehouse/widgets/custom_dropdown_button.dart';
@@ -33,6 +35,8 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+  String? selectedFilter;
+
   // List to store movements from database
   List<Movement> allMovements = [];
 
@@ -66,8 +70,16 @@ class _MainPageState extends State<MainPage> {
   late DateTime startDate;
   late DateTime endDate;
 
+  void setupEnvironment() {
+    // if (widget.user!.userType == "Debug" ||
+    //     widget.prefs!.getString("userType") == "Debug") {
+    //   AppEnvironment.setupEnv(Environment.dev);
+    // }
+  }
+
   @override
   void initState() {
+    setupEnvironment();
     startDate = DateTime(2023, 1, 1);
     endDate = DateTime.now();
     super.initState();
@@ -202,8 +214,8 @@ class _MainPageState extends State<MainPage> {
     switch (item) {
       case 0:
         {
-          SharedPreferences pref = await SharedPreferences.getInstance();
-          await pref.clear();
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.clear();
           navigator?.pushReplacement(
             CupertinoPageRoute(
               builder: (BuildContext context) => LoginPage(),
@@ -248,6 +260,89 @@ class _MainPageState extends State<MainPage> {
       endDate =
           DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59, 0, 0);
     }
+  }
+
+  int getItemCount(String filterSelected) {
+    Map<String, List<String>> uniques = {
+      'partNumber': uniquePartNumbers,
+      'username': uniqueUsers,
+      'orderNumber': uniqueOrders,
+      'type': uniqueTypes,
+    };
+    switch (filterSelected) {
+      case "Por Número de Parte":
+        return uniques['partNumber']!.length;
+      case "Por Usuario":
+        return uniques['username']!.length;
+      case "Por Movimiento":
+        return uniques['type']!.length;
+      case "Por Número de Orden":
+        return uniques['orderNumber']!.length;
+      default:
+        return 0;
+    }
+  }
+
+  // get values to filter
+  List<String> getValues(String filterSelected) {
+    Map<String, List<String>> uniques = {
+      'partNumber': uniquePartNumbers,
+      'username': uniqueUsers,
+      'orderNumber': uniqueOrders,
+      'type': uniqueTypes,
+    };
+    switch (filterSelected) {
+      case "Por Número de Parte":
+        return uniques['partNumber']!.toList();
+      case "Por Usuario":
+        return uniques['username']!.toList();
+      case "Por Movimiento":
+        return uniques['type']!.toList();
+      case "Por Número de Orden":
+        return uniques['orderNumber']!.toList();
+      default:
+        return [];
+    }
+  }
+
+  // get values to filter
+  String getField(String filterSelected) {
+    switch (filterSelected) {
+      case "Por Número de Parte":
+        return 'partNumber';
+      case "Por Usuario":
+        return 'username';
+      case "Por Movimiento":
+        return 'type';
+      case "Por Número de Orden":
+        return 'orderNumber';
+      default:
+        return '';
+    }
+  }
+
+  Future<dynamic> _showModalBottomSheet(BuildContext context, String? value) {
+    return showModalBottomSheet(
+      backgroundColor: const Color(0xFF2E236E),
+      context: context,
+      builder: (BuildContext context) {
+        int itemCount = getItemCount(value!);
+        List<String> values = getValues(value);
+        String field = getField(value);
+
+        // custom widget
+        return CustomBottomSheet(
+          height: MediaQuery.of(context).size.height,
+          itemCount: itemCount,
+          values: values,
+          filters: filters,
+          field: field,
+          isValidFilter: isValidFilter,
+          toggleFilter: toggleFilter,
+          applyFiltersAndUpdate: applyFiltersAndUpdate,
+        );
+      },
+    );
   }
 
   Future<void> dialogBuilder(BuildContext context) {
@@ -343,21 +438,22 @@ class _MainPageState extends State<MainPage> {
       body: Stack(
         children: [
           // Dropwdown Button Filters
-          CustomDropDownButton(
+          Positioned(
             top: 50,
             left: 60,
-            menuFilters: menuFilters,
-            height: screenHeight,
-            filters: filters,
-            isValidFilter: isValidFilter,
-            toggleFilter: toggleFilter,
-            applyFiltersAndUpdate: applyFiltersAndUpdate,
-            uniques: {
-              'partNumber': uniquePartNumbers,
-              'username': uniqueUsers,
-              'orderNumber': uniqueOrders,
-              'type': uniqueTypes,
-            },
+            child: CustomDropDownButton(
+              menuItems: menuFilters,
+              width: 250,
+              type: "Filters",
+              hint: 'Filtrar...',
+              icon: Icons.filter_alt_sharp,
+              onChanged: (value) {
+                setState(() {
+                  _showModalBottomSheet(context, value);
+                  selectedFilter = null;
+                });
+              },
+            ),
           ),
 
           CustomPositionedButton(

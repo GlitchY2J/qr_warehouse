@@ -1,13 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-//import 'package:flutter/foundation.dart';
+import 'package:qr_warehouse/env.dart';
 
 class DatabaseHelper {
-  // choose between testing or production database
-  static const String _baseUrl = kDebugMode
-      ? 'http://10.30.0.42/Dashboard/qr_warehouse/testing'
-      : 'http://10.30.0.42/Dashboard/qr_warehouse';
+  static final _baseUrl = AppEnvironment.baseApiUrl;
 
   /// GET METHOD
   static Future<http.Response> get(String endpoint, dynamic data) async {
@@ -58,6 +55,7 @@ class DatabaseHelper {
 
   /// MOVEMENTS METHOD
   static Future<http.Response> getMovements(String endpoint) async {
+    debugPrint(_baseUrl);
     final response = await http.get(Uri.parse('$_baseUrl/$endpoint'));
 
     return response;

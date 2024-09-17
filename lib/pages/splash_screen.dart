@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_warehouse/app.dart';
+import 'package:qr_warehouse/env.dart';
 import 'package:qr_warehouse/pages/login_page.dart';
 import 'package:qr_warehouse/pages/main_page.dart';
 import 'package:qr_warehouse/widgets/astro_logo.dart';
@@ -28,13 +29,21 @@ class _SplashScreenState extends State<SplashScreen>
     asyncInit();
 
     Future.delayed(const Duration(seconds: 2), () {
-      Navigator.of(context).pushReplacement(MaterialPageRoute(
-        builder: (_) => prefs.getString("username") == null
-            ? LoginPage()
-            : MainPage(
-                prefs: prefs,
-              ),
-      ));
+      if (prefs.getString("username") == null) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => LoginPage(),
+          ),
+        );
+      } else {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => MainPage(
+              prefs: prefs,
+            ),
+          ),
+        );
+      }
     });
   }
 
