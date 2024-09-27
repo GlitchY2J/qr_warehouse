@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:qr_warehouse/pages/login_page.dart';
+import 'package:qr_warehouse/widgets/custom_button.dart';
 
 class PartsCantBeUpdated extends StatelessWidget {
   const PartsCantBeUpdated({

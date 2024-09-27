@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
-
 import 'package:qr_warehouse/models/part_number.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
 import 'package:qr_warehouse/widgets/custom_icon_button.dart';

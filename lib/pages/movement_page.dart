@@ -1,13 +1,16 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_warehouse/models/part_number.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
+import 'package:qr_warehouse/utils/formatters.dart';
 import 'package:qr_warehouse/utils/ui.dart';
 import 'package:qr_warehouse/widgets/confirm_widget.dart';
 import 'package:qr_warehouse/widgets/custom_icon_button.dart';
-
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MovementPage extends StatefulWidget {
@@ -47,6 +50,58 @@ class _MovementPageState extends State<MovementPage> {
     super.dispose();
   }
 
+  ///
+  /// VERIFY MODIFICATIONS BEFORE UPDATING IN DATABASE
+  ///
+  Future<void> verifyPersistency(String part, String value) async {
+    http.Response response = await FormController.getQuantity(part);
+
+    if (response.statusCode == 200) {
+      List<dynamic> quantities = jsonDecode(response.body);
+
+      if (quantities[0]['quantity'] == value ||
+          Formatters.numberToDouble(quantities[0]['quantity']) == value) {
+        updateInventoryAndRecords();
+      } else {
+        // Values have been changed
+        // Shows Confirmation Widget
+        PartNumber newPartNumber = PartNumber(
+          partNumber: widget.partNumber.partNumber,
+          description: widget.partNumber.description,
+          measure: widget.partNumber.measure,
+          quantity: Formatters.integerOrDouble(
+              quantities[0]['quantity'], widget.partNumber.measure),
+          min: widget.partNumber.min,
+          max: widget.partNumber.max,
+          location: widget.partNumber.location,
+          manufacter: widget.partNumber.manufacter,
+          mnfPartNumber: widget.partNumber.mnfPartNumber,
+          isActive: widget.partNumber.isActive,
+        );
+        Ui.showWidgetAlert(
+          context,
+          ConfirmWidget(
+            partNumber: newPartNumber,
+            addedQty: Formatters.integerOrDouble(
+                quantityController.text, newPartNumber.measure),
+            newQty: Formatters.integerOrDouble(
+              calculateFinalQuantity(
+                widget.action,
+                num.parse(newPartNumber.quantity),
+              ).toString(),
+              newPartNumber.measure,
+            ),
+          ),
+          () => updateInventoryAndRecords(),
+          "confirmation",
+        );
+      }
+    }
+  }
+
+  ///
+  /// CALCULATE FINAL QUANTITY
+  ///
   num calculateFinalQuantity(String action, num initialQuantity) {
     final num finalQuantity;
     if (action == "substract") {
@@ -58,13 +113,13 @@ class _MovementPageState extends State<MovementPage> {
     return finalQuantity;
   }
 
-  updateInventoryAndRecords() async {
+  ///
+  /// UPDATE INVENTORY AND RECORDS
+  ///
+  void updateInventoryAndRecords() async {
     // create a reference for passed variables
-    // int initialQuantity = int.parse(widget.partNumber.quantity);
-    num initialQuantity =
-        widget.partNumber.measure == 'FT' || widget.partNumber.measure == 'YD'
-            ? double.parse(widget.partNumber.quantity)
-            : int.parse(widget.partNumber.quantity);
+    num initialQuantity = num.parse(Formatters.integerOrDouble(
+        widget.partNumber.quantity, widget.partNumber.measure));
 
     String action = widget.action;
 
@@ -112,7 +167,7 @@ class _MovementPageState extends State<MovementPage> {
         snackBar = const SnackBar(content: Text("Registro Completo."));
 
         if (context.mounted) {
-          PartNumber partNumber = PartNumber(
+          PartNumber myPartNumber = PartNumber(
             partNumber: widget.partNumber.partNumber,
             description: widget.partNumber.description,
             measure: widget.partNumber.measure,
@@ -124,7 +179,7 @@ class _MovementPageState extends State<MovementPage> {
             mnfPartNumber: widget.partNumber.mnfPartNumber,
             isActive: widget.partNumber.isActive,
           );
-          Navigator.pop(context, partNumber);
+          Navigator.pop(context, myPartNumber);
         }
       } else {
         snackBar = const SnackBar(
@@ -207,9 +262,6 @@ class _MovementPageState extends State<MovementPage> {
                     TextFormField(
                       controller: quantityController,
                       keyboardType: TextInputType.number,
-                      // inputFormatters: <TextInputFormatter>[
-                      //   FilteringTextInputFormatter.digitsOnly
-                      // ],
                       decoration: InputDecoration(
                         hintText: 'Cantidad',
                         hintStyle: TextStyle(color: Colors.grey[500]),
@@ -246,12 +298,21 @@ class _MovementPageState extends State<MovementPage> {
                             context,
                             ConfirmWidget(
                               partNumber: widget.partNumber,
-                              addedQty: quantityController.text,
-                              newQty: calculateFinalQuantity(widget.action,
-                                      num.parse(widget.partNumber.quantity))
-                                  .toString(),
+                              // addedQty: quantityController.text,
+                              addedQty: Formatters.integerOrDouble(
+                                  quantityController.text,
+                                  widget.partNumber.measure),
+                              newQty: Formatters.integerOrDouble(
+                                  calculateFinalQuantity(widget.action,
+                                          num.parse(widget.partNumber.quantity))
+                                      .toString(),
+                                  widget.partNumber.measure),
                             ),
-                            () => updateInventoryAndRecords(),
+                            // () => updateInventoryAndRecords(),
+                            () => verifyPersistency(
+                              widget.partNumber.partNumber.toString(),
+                              widget.partNumber.quantity.toString(),
+                            ),
                             widget.action,
                           );
                         }

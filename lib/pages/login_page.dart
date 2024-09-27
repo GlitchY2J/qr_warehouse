@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:qr_warehouse/env.dart';
 import 'package:qr_warehouse/models/user.dart';
 import 'package:qr_warehouse/pages/main_page.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
 import 'package:qr_warehouse/widgets/app_text.dart';
 import 'package:qr_warehouse/widgets/astro_logo.dart';
+import 'package:qr_warehouse/widgets/custom_button.dart';
 import 'package:qr_warehouse/widgets/custom_textfield.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -141,64 +141,6 @@ class LoginPage extends StatelessWidget {
                     ),
                   )
                 ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class CustomButton extends StatelessWidget {
-  const CustomButton({
-    super.key,
-    this.padding = const EdgeInsets.symmetric(horizontal: 60),
-    this.width,
-    required this.text,
-    required this.onTap,
-    this.color = const Color(0xFF433D8B),
-    this.textColor = Colors.white,
-  });
-
-  final EdgeInsets padding;
-  final double? width;
-  final String text;
-  final Function() onTap;
-  final Color? color;
-  final Color? textColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: padding,
-      child: SizedBox(
-        width: double.infinity,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            //color: Colors.blue.shade400,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Material(
-            color: color,
-            borderRadius: BorderRadius.circular(8),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(8),
-              onTap: onTap,
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    text,
-                    style: TextStyle(
-                      color: textColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
               ),
             ),
           ),

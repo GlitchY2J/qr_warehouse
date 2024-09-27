@@ -1,14 +1,19 @@
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_warehouse/models/part_number.dart';
 import 'package:qr_warehouse/pages/edit_page.dart';
+import 'package:qr_warehouse/pages/login_page.dart';
 import 'package:qr_warehouse/pages/movement_page.dart';
 import 'package:qr_warehouse/pages/qr_code_page.dart';
 import 'package:qr_warehouse/utils/form_controller.dart';
 import 'package:qr_warehouse/widgets/app_text.dart';
+import 'package:qr_warehouse/widgets/custom_button.dart';
 import 'package:qr_warehouse/widgets/custom_floating_action_button.dart';
 import 'package:qr_warehouse/widgets/custom_icon_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class DetailsPage extends StatefulWidget {
   final PartNumber partNumber;
@@ -30,11 +35,16 @@ class _DetailsPageState extends State<DetailsPage> {
   late String location;
   late String quantity;
 
+  bool isImageLoaded = false;
+  String imagePath = '';
+  bool imageExists = false;
+
   @override
   void initState() {
     getSharedPrefs();
     myPartNumber = widget.partNumber;
     setDetailsValues();
+    loadImage();
     super.initState();
   }
 
@@ -46,12 +56,125 @@ class _DetailsPageState extends State<DetailsPage> {
     });
   }
 
-  // PARSE NUMBER AS INTEGER OR DOUBLE
-  String integerOrDouble(String value) {
-    if (num.parse(value) % 1 == 0) {
-      return int.parse(value).toString();
-    } else {
-      return double.parse(value).toStringAsFixed(1);
+  // PARSE NUMBER TO DOUBLE
+  String numberToDouble(String value) {
+    return double.parse(value).toStringAsFixed(1);
+  }
+
+  // PARSE NUMBER TO INTEGER
+  String numberToInteger(String value) {
+    return int.parse(value).toString();
+  }
+
+  // LOAD IMAGE
+  Future<void> loadImage() async {
+    // image server path
+    final defaultImagePath =
+        'http://10.30.0.42/Dashboard/qr_warehouse/images/$partNumber.png?timestamp=${DateTime.now().microsecondsSinceEpoch}';
+
+    try {
+      final response = await http.get(Uri.parse(defaultImagePath));
+      if (response.statusCode == 200) {
+        setState(() {
+          // image path assigned and image loaded
+          imagePath = defaultImagePath;
+          isImageLoaded = true;
+          imageExists = true;
+        });
+      } else {
+        loadPlaceholderImage();
+      }
+    } catch (e) {
+      loadPlaceholderImage();
+    }
+  }
+
+  void loadPlaceholderImage() {
+    setState(() {
+      imagePath = 'assets/images/placeholder.jpg';
+      isImageLoaded = true;
+    });
+  }
+
+  // PICK IMAGE
+  Future<void> pickImage() async {
+    // Open file picker
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      allowMultiple: false,
+    );
+
+    if (result != null) {
+      String filePath = result.files.single.path!;
+      File selectedFile = File(filePath);
+
+      if (imageExists == true) {
+        bool? shouldReplace = await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              backgroundColor: const Color(0xFF17153B),
+              title: const Text("Reemplazar Imagen"),
+              content: const Text('¿Deseas reemplazar la imagen existente?'),
+              actions: [
+                CustomButton(
+                  padding: EdgeInsets.zero,
+                  text: 'Cancelar',
+                  color: Colors.white,
+                  textColor: Colors.black,
+                  onTap: () {
+                    Navigator.pop(context, false);
+                  },
+                  width: 200,
+                ),
+                CustomButton(
+                  padding: EdgeInsets.zero,
+                  text: 'Confirmar',
+                  onTap: () {
+                    Navigator.pop(context, true);
+                  },
+                  width: 200,
+                )
+              ],
+            );
+          },
+        );
+
+        if (shouldReplace ?? false) {
+          await uploadImage(selectedFile);
+        }
+      } else {
+        try {
+          uploadImage(selectedFile);
+          loadImage();
+        } catch (e) {
+          debugPrint(e.toString());
+        }
+      }
+    }
+  }
+
+  Future<void> uploadImage(File file) async {
+    const uploadScript =
+        'http://10.30.0.42/Dashboard/qr_warehouse/upload_files.php';
+
+    var request = http.MultipartRequest('POST', Uri.parse(uploadScript));
+    request.files.add(await http.MultipartFile.fromPath('file', file.path));
+    request.fields['customFileName'] = '${widget.partNumber.partNumber}.png';
+
+    try {
+      var response = await request.send();
+      if (response.statusCode == 200) {
+        setState(() {
+          imagePath =
+              'http://10.30.0.42/Dashboard/qr_warehouse/images/$partNumber.png?timestamp=${DateTime.now().microsecondsSinceEpoch}';
+        });
+        debugPrint("success");
+      } else {
+        debugPrint("failure");
+      }
+    } catch (e) {
+      debugPrint(e.toString());
     }
   }
 
@@ -60,8 +183,11 @@ class _DetailsPageState extends State<DetailsPage> {
     partNumber = myPartNumber.partNumber;
     description = myPartNumber.description;
     location = myPartNumber.location;
-
-    quantity = integerOrDouble(myPartNumber.quantity);
+    quantity = myPartNumber.measure == "FT" ||
+            myPartNumber.measure == "IN" ||
+            myPartNumber.measure == "YD"
+        ? numberToDouble(myPartNumber.quantity)
+        : numberToInteger(myPartNumber.quantity);
   }
 
   // GO TO MOVEMENT PAGE
@@ -201,19 +327,46 @@ class _DetailsPageState extends State<DetailsPage> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Image.network(
-                          'http://10.30.0.42/Dashboard/qr_warehouse/images/$partNumber.png',
-                          width: 200,
-                          height: 200,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Image.asset(
-                              'assets/images/placeholder.jpg',
-                              width: 200,
-                              height: 200,
-                              fit: BoxFit.cover,
-                            );
-                          },
+                        Stack(
+                          children: [
+                            isImageLoaded
+                                ? Image.network(
+                                    imagePath,
+                                    width: 200,
+                                    height: 200,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Image.asset(
+                                        'assets/images/placeholder.jpg',
+                                        width: 200,
+                                        height: 200,
+                                        fit: BoxFit.cover,
+                                      );
+                                    },
+                                  )
+                                : const CircularProgressIndicator(),
+                            Positioned(
+                              top: 5,
+                              right: 5,
+                              child: GestureDetector(
+                                onTap: () {
+                                  pickImage();
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.all(5),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withOpacity(0.2),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.more_vert_outlined,
+                                    color: Colors.white,
+                                    size: 30,
+                                  ),
+                                ),
+                              ),
+                            )
+                          ],
                         ),
                       ],
                     ),
@@ -245,10 +398,7 @@ class _DetailsPageState extends State<DetailsPage> {
                 const SizedBox(height: 20),
 
                 userType == "Admin"
-                    ?
-
-                    // Button to delete part number (disable it)
-                    Column(
+                    ? Column(
                         children: [
                           // Button to edit part number
                           CustomIconButton(
@@ -260,7 +410,8 @@ class _DetailsPageState extends State<DetailsPage> {
                               context,
                               CupertinoPageRoute(
                                 builder: (context) => EditPage(
-                                  partNumber: widget.partNumber,
+                                  // partNumber: widget.partNumber,
+                                  partNumber: myPartNumber,
                                 ),
                               ),
                             ).then((value) {
@@ -273,6 +424,7 @@ class _DetailsPageState extends State<DetailsPage> {
                             }),
                           ),
                           const SizedBox(height: 20),
+                          // Button to delete part number (disable it)
                           CustomIconButton(
                             text: "Eliminar Número de Parte",
                             icon: Icons.delete,

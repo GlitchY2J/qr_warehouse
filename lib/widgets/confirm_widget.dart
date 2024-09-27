@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:qr_warehouse/models/part_number.dart';
+import 'package:qr_warehouse/utils/formatters.dart';
 
 class ConfirmWidget extends StatelessWidget {
   const ConfirmWidget({
@@ -39,7 +40,8 @@ class ConfirmWidget extends StatelessWidget {
               Column(
                 children: [
                   Text(
-                    partNumber.quantity,
+                    Formatters.integerOrDouble(
+                        partNumber.quantity, partNumber.measure),
                     style: const TextStyle(
                       color: Colors.red,
                       fontWeight: FontWeight.bold,

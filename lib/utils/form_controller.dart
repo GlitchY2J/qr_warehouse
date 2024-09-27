@@ -36,4 +36,9 @@ class FormController {
       List<Map<String, dynamic>> batch) async {
     return await DatabaseHelper.post("update_batch.php", batch);
   }
+
+  static Future<http.Response> getQuantity(partnumber) async {
+    return await DatabaseHelper.get(
+        "get_quantity.php", {"partnumber": partnumber});
+  }
 }

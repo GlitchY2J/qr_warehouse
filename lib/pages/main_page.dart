@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:qr_warehouse/env.dart';
 import 'package:qr_warehouse/models/movement.dart';
 import 'package:qr_warehouse/models/user.dart';
 import 'package:qr_warehouse/pages/login_page.dart';
@@ -70,16 +69,8 @@ class _MainPageState extends State<MainPage> {
   late DateTime startDate;
   late DateTime endDate;
 
-  void setupEnvironment() {
-    // if (widget.user!.userType == "Debug" ||
-    //     widget.prefs!.getString("userType") == "Debug") {
-    //   AppEnvironment.setupEnv(Environment.dev);
-    // }
-  }
-
   @override
   void initState() {
-    setupEnvironment();
     startDate = DateTime(2023, 1, 1);
     endDate = DateTime.now();
     super.initState();

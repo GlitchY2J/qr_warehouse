@@ -18,7 +18,7 @@ class InventoryQuantityCard extends StatelessWidget {
       bottom: 15,
       right: 50,
       child: Text(
-        '${Formatters.integerOrDouble(parts[index].quantity)} ${parts[index].measure}',
+        '${Formatters.integerOrDouble(parts[index].quantity, parts[index].measure)} ${parts[index].measure}',
         style: const TextStyle(
           fontSize: 15,
           color: Colors.white70,

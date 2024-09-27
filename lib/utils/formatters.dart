@@ -13,11 +13,21 @@ class Formatters {
     return formatedDate;
   }
 
-  static String integerOrDouble(String value) {
-    if (num.parse(value) % 1 == 0) {
-      return int.parse(value).toString();
+  static String integerOrDouble(String value, String measure) {
+    if (measure == 'IN' || measure == 'FT' || measure == 'YD') {
+      return numberToDouble(value);
     } else {
-      return double.parse(value).toStringAsFixed(1);
+      return numberToInteger(value);
     }
+  }
+
+  // PARSE NUMBER TO DOUBLE
+  static String numberToDouble(String value) {
+    return double.parse(value).toStringAsFixed(1);
+  }
+
+  // PARSE NUMBER TO INTEGER
+  static String numberToInteger(String value) {
+    return int.parse(value).toString();
   }
 }

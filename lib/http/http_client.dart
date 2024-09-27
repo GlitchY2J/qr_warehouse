@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:qr_warehouse/env.dart';
 
@@ -55,7 +54,6 @@ class DatabaseHelper {
 
   /// MOVEMENTS METHOD
   static Future<http.Response> getMovements(String endpoint) async {
-    debugPrint(_baseUrl);
     final response = await http.get(Uri.parse('$_baseUrl/$endpoint'));
 
     return response;
