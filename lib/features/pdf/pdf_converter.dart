@@ -15,13 +15,24 @@ class PDFConverter {
       "Fecha y Hora"
     ];
 
-    final data = table;
+    //get division number
+    const rowsPerTable = 17;
+    var chunks = [];
+    for (var i = 0; i < table.length; i += rowsPerTable) {
+      chunks.add(table.sublist(i,
+          i + rowsPerTable > table.length ? table.length : i + rowsPerTable));
+    }
+
+    print(chunks);
 
     // create pdf document
     final doc = pw.Document(pageMode: PdfPageMode.outlines);
 
+    var data = table;
+
     doc.addPage(
-      pw.Page(
+      pw.MultiPage(
+        maxPages: 100,
         pageTheme: pw.PageTheme(
           pageFormat: PdfPageFormat.letter.copyWith(
             marginBottom: 0,
@@ -35,8 +46,8 @@ class PDFConverter {
             bold: pw.Font.helveticaBold(),
           ),
         ),
-        build: (context) {
-          return pw.Padding(
+        build: (pw.Context context) => [
+          pw.Padding(
             padding: const pw.EdgeInsets.only(
               top: 30,
               left: 10,
@@ -55,9 +66,9 @@ class PDFConverter {
                         child: pw.Text(
                           header.toString(),
                           style: pw.TextStyle(
-                              fontSize: 14,
-                              color: PdfColors.white,
-                              fontWeight: pw.FontWeight.bold),
+                            fontSize: 10,
+                            color: PdfColors.white,
+                          ),
                         ),
                       );
                     },
@@ -75,8 +86,8 @@ class PDFConverter {
                 }).toList(),
               ],
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
 
