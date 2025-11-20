@@ -26,6 +26,7 @@ class LoginPage extends StatelessWidget {
     http.Response response = await FormController.loginUser(username, password);
 
     if (response.statusCode == 200 && response.body != "null") {
+      debugPrint(response.body);
       User user = User.fromJson(jsonDecode(response.body));
 
       SharedPreferences prefs = await SharedPreferences.getInstance();

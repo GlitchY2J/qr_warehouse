@@ -9,12 +9,12 @@ abstract class AppEnvironment {
     switch (_environment) {
       case Environment.dev:
         {
-          baseApiUrl = 'http://10.30.0.42/Dashboard/qr_warehouse/testing';
+          baseApiUrl = 'http://10.30.0.41/Dashboard/qr_warehouse/testing';
           break;
         }
       case Environment.prod:
         {
-          baseApiUrl = 'http://10.30.0.42/Dashboard/qr_warehouse';
+          baseApiUrl = 'http://10.30.0.41/Dashboard/qr_warehouse';
           break;
         }
     }

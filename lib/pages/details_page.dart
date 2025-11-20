@@ -70,7 +70,7 @@ class _DetailsPageState extends State<DetailsPage> {
   Future<void> loadImage() async {
     // image server path
     final defaultImagePath =
-        'http://10.30.0.42/Dashboard/qr_warehouse/images/$partNumber.png?timestamp=${DateTime.now().microsecondsSinceEpoch}';
+        'http://10.30.0.41/Dashboard/qr_warehouse/images/$partNumber.png?timestamp=${DateTime.now().microsecondsSinceEpoch}';
 
     try {
       final response = await http.get(Uri.parse(defaultImagePath));

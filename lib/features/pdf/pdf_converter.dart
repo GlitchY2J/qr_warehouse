@@ -65,7 +65,7 @@ class PDFConverter {
                         padding: const pw.EdgeInsets.all(8),
                         child: pw.Text(
                           header.toString(),
-                          style: pw.TextStyle(
+                          style: const pw.TextStyle(
                             fontSize: 10,
                             color: PdfColors.white,
                           ),
